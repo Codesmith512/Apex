@@ -20,10 +20,6 @@ list:
 	@echo kernel : Builds the kernel
 	@echo clean : Cleans up all intermediate files
 
-.PHONY: debug
-debug:
-	@echo $(ASM_O)
-
 # Build any .cpp.o file from it's .cpp file
 %.co : %.cpp
 	$(CC) -c $< -o $@ $(CFLAGS)
@@ -36,7 +32,30 @@ debug:
 kernel: $(ASM_SOURCES:.asm=.ao) $(CPP_SOURCES:.cpp=.co) $(CPP_HEADERS)
 	$(CC) -T kernel.ld -o $@.elf $^ $(LFLAGS)
 
+# Build the virtual disk for the kernel
+vdisk: kernel
+# Create the virtual disk image
+	dd if=/dev/zero of=./disk.img bs=1M count=1
+
+# Format disk image
+	mkfs.ext2 ./disk.img
+
+# Mount disk image and set ownership
+	mkdir disk.img.d
+	sudo mount -o loop=/dev/loop0 ./disk.img ./disk.img.d
+	sudo chown -R code:code ./disk.img.d
+
+# Copy disk files
+	cp -r disk/* disk.img.d/
+
+# Copy kernel
+	cp kernel.elf disk.img.d/boot/kernel.elf
+
+# Unmount disk
+	sudo umount disk.img.d
+	rmdir disk.img.d
+
 # Clean rule
 .PHONY: clean
 clean:
-	rm -f *.ao *.co *.elf
+	rm -f *.ao *.co *.elf *.img *.raw
