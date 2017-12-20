@@ -9,6 +9,7 @@ extern kernel_main
 
 ; #################
 ; Multiboot Header
+; https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#dir
 ; #################
 
 MB_MAGIC equ 0xe85250d6             ; Magic number
