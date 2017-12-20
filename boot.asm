@@ -10,17 +10,25 @@ extern kernel_main
 ; #################
 ; Multiboot Header
 ; #################
-MB_ALIGN equ 0x01               ; Flag to align modules on pages
-MB_MMAP  equ 0x02               ; Flag to provide a memory map
-MB_FLAGS equ MB_ALIGN | MB_MMAP ; Final multiboot flags field
-MB_MAGIC equ 0x1badb002         ; Multiboot checksum
-MB_CHKSUM equ -(MB_MAGIC + MB_FLAGS)    ; Checksum
+
+MB_MAGIC equ 0xe85250d6             ; Magic number
+MB_ARCH equ  0x00000000             ; Defines 32b i386 architecture
+MB_SIZE equ (header.end - header)   ; Size of the header
+MB_CHKSUM equ -(MB_MAGIC + MB_ARCH + MB_SIZE)
 
 section .multiboot
-align 4
+header:
+; Standard header 
   dd MB_MAGIC
-  dd MB_FLAGS
+  dd MB_ARCH
+  dd MB_SIZE
   dd MB_CHKSUM
+
+; Null tag
+  dd 0
+  dd 0
+  dd 8
+.end:
 
 ; ####################################
 ; Allocate memory for the 16KiB stack
