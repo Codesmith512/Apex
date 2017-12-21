@@ -44,9 +44,11 @@ kernel: $(ASM_OBJECTS) $(CPP_OBJECTS) libstl
 # Clean rule
 .PHONY: clean
 clean:
+	make -C libstl clean
 	rm -f *.ao *.co
 
 # Cleans all virtual device targets
 .PHONY: distclean
 distclean: clean
+	make -C libstl distclean
 	rm -f *.elf *.a

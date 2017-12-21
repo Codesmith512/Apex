@@ -5,8 +5,9 @@ list:
 	@echo kernel : Builds the kernel
 	@echo vdisk : Builds the virtual disk VM image
 	@echo boot-qemu : All of the above and and boots qemu
+	@echo badclean : Cleans up everything from a bad vdisk build
 	@echo clean : Cleans up all intermediate files
-	@echo dist-clean : Cleans up all everything
+	@echo distclean : Cleans up all everything
 
 # Build the kernel
 .PHONY: kernel
@@ -17,7 +18,7 @@ kernel:
 # Build the virtual disk for the kernel
 vdisk: kernel
 # Create the virtual disk image
-	dd if=/dev/zero of=./disk.img bs=1M count=8
+	dd if=/dev/zero of=./disk.img bs=1M count=64
 
 # Create GPT
 	./make_gpt.sh ./disk.img
@@ -35,7 +36,7 @@ vdisk: kernel
 	cp -r disk/* disk.img.d/
 
 # Install grub
-	sudo grub-install --target=i386-pc --root-directory=./disk.img.d --no-floppy --modules="normal part_gpt ext2 multiboot2" /dev/loop0
+	sudo grub-install --target=i386-pc --root-directory=./disk.img.d --boot-directory=./disk.img.d/boot --themes= --no-floppy --modules="normal part_gpt ext2 multiboot2" /dev/loop0
 
 # Unmount disk
 	sudo umount disk.img.d
@@ -45,6 +46,13 @@ vdisk: kernel
 .PHONY:boot-qemu
 boot-qemu: vdisk
 	qemu-system-i386 -drive 'file=disk.img,format=raw'
+
+# Cleans up from a bad/partial disk build
+.PHONY:bad-clean
+bad-clean:
+	sudo umount disk.img.d || true
+	sudo losetup -d /dev/loop0 || true
+	rmdir disk.img.d || true
 
 # Clean rule
 .PHONY: clean
@@ -56,4 +64,3 @@ clean:
 distclean: clean
 	make -C src distclean
 	rm -f *.img
-	rm -rf disk/*.elf
