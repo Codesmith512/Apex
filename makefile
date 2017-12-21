@@ -63,7 +63,16 @@ vdisk: kernel
 	rmdir disk.img.d
 	sudo losetup -d /dev/loop0
 
+.PHONY:boot-qemu
+boot-qemu: vdisk
+	qemu-system-i386 -drive 'file=disk.img,format=raw'
+
 # Clean rule
 .PHONY: clean
 clean:
-	rm -f *.ao *.co *.elf *.img *.raw
+	rm -f *.ao *.co *.elf
+
+# Cleans all virtual device targets
+.PHONE: vclean
+vclean: clean
+	rm -f *.img
