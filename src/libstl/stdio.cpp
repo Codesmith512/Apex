@@ -3,25 +3,32 @@
 #define WIDTH 80
 #define HEIGHT 25
 
-namespace std
+struct Cursor
+{ unsigned short x, y; };
+static Cursor cur {0,0};
+
+STL_BEGIN
+
+/* Stream out operator */
+cout_t& cout_t::operator<<(const char* string)
 {
-  /* Constructor */
-  cout::cout(unsigned short cursor_x /* = 0 */, unsigned short cursor_y /* = 0 */)
-  :cursor{cursor_x, cursor_y}
+  char* vram_ptr = reinterpret_cast<char*>(0xb8000 + (WIDTH * 2 * cur.y) + (2 * cur.x));
+  char format = 0x0f;
+  for(const char* c = string; *c; ++c)
   {
+    *(vram_ptr++) = *c;
+    *(vram_ptr++) = format;
 
-  }
-
-  /* Stream out operator */
-  cout& cout::operator<<(const char* string)
-  {
-    char* vram_ptr = reinterpret_cast<char*>(0xb8000 + (WIDTH * 2 * cursor.y) + (2 * cursor.x));
-    char format = 0x0f;
-    for(const char* c = string; *c; ++c)
+    ++cur.x;
+    if(cur.x == WIDTH)
     {
-      *(vram_ptr++) = *c;
-      *(vram_ptr++) = format;
+      ++cur.y;
+      cur.x = 0;
+      if(cur.y == HEIGHT)
+        cur.y = 0;
     }
-    return *this;
   }
+  return *this;
 }
+
+STL_END

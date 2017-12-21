@@ -11,7 +11,7 @@ extern "C"
     /* Print classic hello world message */
     std::stack_string h = "Hello";
     h += " World";
-    std::cout() << h.c_str();
+    std::cout << h.c_str();
 
     /* Stall */
     for(;;);

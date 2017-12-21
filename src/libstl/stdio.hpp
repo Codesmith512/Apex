@@ -1,23 +1,21 @@
 #pragma once
 
+#include "libstl.hpp"
+
+STL_BEGIN
+
 /**
- * @class cout
- * @brief Used for basic text output
- */
-namespace std
+* @class cout_t
+* @brief The type used for basic text output
+*/
+
+class cout_t
 {
-  class cout
-  {
-  public:
-
-    /* Default/Initialization Constructor */
-    cout(unsigned short cursor_x = 0, unsigned short cursor_y = 0);
-
-    /* Writes a standard C-style string */
-    cout& operator<<(const char*);
-
-  private:
-    /* The cursor location */
-    struct Cursor { unsigned short x, y; } cursor;
-  };
+public:
+  /* Writes a standard C-style string */
+  cout_t& operator<<(const char*);
 };
+
+static cout_t cout;
+
+STL_END
