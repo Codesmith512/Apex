@@ -1,6 +1,6 @@
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
+CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I.
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 
 # Define c++ source, header, and object files
@@ -22,7 +22,7 @@ list:
 	@echo dist-clean : Cleans up all everything
 
 # Build any .cpp.o file from it's .cpp file
-%.co : %.cpp
+%.co : %.cpp $(CPP_HEADERS)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 # Build any .asm.o file from it's .asm file
@@ -30,7 +30,7 @@ list:
 	$(NASM) -f elf32 -o $@ $<
 
 # Build the kernel
-kernel: $(ASM_SOURCES:.asm=.ao) $(CPP_SOURCES:.cpp=.co) $(CPP_HEADERS)
+kernel: $(ASM_SOURCES:.asm=.ao) $(CPP_SOURCES:.cpp=.co)
 	$(CC) -T kernel.ld -o $@.elf $^ $(LFLAGS)
 
 # Clean rule

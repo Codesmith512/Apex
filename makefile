@@ -54,5 +54,5 @@ clean:
 # Cleans all virtual device targets
 .PHONY: distclean
 distclean: clean
-	make -C src dist-clean
+	make -C src distclean
 	rm -rf *.img
