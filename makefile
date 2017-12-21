@@ -35,14 +35,18 @@ kernel: $(ASM_SOURCES:.asm=.ao) $(CPP_SOURCES:.cpp=.co) $(CPP_HEADERS)
 # Build the virtual disk for the kernel
 vdisk: kernel
 # Create the virtual disk image
-	dd if=/dev/zero of=./disk.img bs=1M count=1
+	dd if=/dev/zero of=./disk.img bs=1M count=8
 
-# Format disk image
-	mkfs.ext2 ./disk.img
+# Create GPT
+	./make_gpt.sh ./disk.img
+
+# Create loopback device and format
+	sudo losetup -P /dev/loop0 ./disk.img
+	sudo mkfs.ext2 /dev/loop0p2
 
 # Mount disk image and set ownership
 	mkdir disk.img.d
-	sudo mount -o loop=/dev/loop0 ./disk.img ./disk.img.d
+	sudo mount /dev/loop0p2 ./disk.img.d
 	sudo chown -R code:code ./disk.img.d
 
 # Copy disk files
@@ -51,9 +55,13 @@ vdisk: kernel
 # Copy kernel
 	cp kernel.elf disk.img.d/boot/kernel.elf
 
+# Install grub
+	sudo grub-install --target=i386-pc --root-directory=./disk.img.d --no-floppy --modules="normal part_gpt ext2 multiboot2" /dev/loop0
+
 # Unmount disk
 	sudo umount disk.img.d
 	rmdir disk.img.d
+	sudo losetup -d /dev/loop0
 
 # Clean rule
 .PHONY: clean
