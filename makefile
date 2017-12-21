@@ -55,4 +55,5 @@ clean:
 .PHONY: distclean
 distclean: clean
 	make -C src distclean
-	rm -rf *.img
+	rm -f *.img
+	rm -rf disk/*.elf
