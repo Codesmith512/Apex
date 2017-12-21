@@ -18,7 +18,10 @@ ASM_SOURCES=$(wildcard *.asm)
 list:
 	@echo Valid targets:
 	@echo kernel : Builds the kernel
+	@echo vdisk : Builds the virtual disk VM image
+	@echo boot-qemu : All of the above and and boots qemu
 	@echo clean : Cleans up all intermediate files
+	@echo dist-clean : Cleans up all everything
 
 # Build any .cpp.o file from it's .cpp file
 %.co : %.cpp
@@ -70,9 +73,9 @@ boot-qemu: vdisk
 # Clean rule
 .PHONY: clean
 clean:
-	rm -f *.ao *.co *.elf
+	rm -f *.ao *.co
 
 # Cleans all virtual device targets
-.PHONE: vclean
-vclean: clean
-	rm -f *.img
+.PHONE: dist-clean
+dist-clean: clean
+	rm -f *.elf *.img
