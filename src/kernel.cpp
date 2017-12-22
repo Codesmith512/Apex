@@ -9,9 +9,9 @@ extern "C"
   [[noreturn]] void kernel_main(void)
   {
     /* Print classic hello world message */
-    std::stack_string h = "Hello";
+    apex::stack_string h = "Hello";
     h += " World";
-    std::cout << h.c_str();
+    apex::cout << h.c_str();
 
     /* Stall */
     for(;;);

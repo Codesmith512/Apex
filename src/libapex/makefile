@@ -1,6 +1,6 @@
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I.
+CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -Wunused-variable -I.
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 AR=i686-elf-ar
 ARFLAGS=rcs
@@ -14,7 +14,7 @@ CPP_OBJECTS=$(CPP_SOURCES:.cpp=.co)
 .PHONY: list
 list:
 	@echo Valid targets:
-	@echo libstl : Builds the STL
+	@echo libapex : Builds the STL
 	@echo clean : Cleans up all intermediate files
 	@echo distclean : Cleans up all everything
 
@@ -23,7 +23,7 @@ list:
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 # Build the STL
-libstl: $(CPP_OBJECTS)
+libapex: $(CPP_OBJECTS)
 	$(AR) $(ARFLAGS) $@.a $^
 
 # Clean rule
