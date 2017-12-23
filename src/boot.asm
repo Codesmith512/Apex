@@ -77,6 +77,7 @@ global _boot
 _boot:
   mov esp, stack_top    ; Setup the stack
   call loadGDT          ; Setup the flat GDT and registers
+  push ebx              ; Push the pointer to multiboot2 info
   call kernel_main      ; Invoke kernel
   cli                   ; Clear interrupts to prevent crashes
 .hang:

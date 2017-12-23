@@ -54,11 +54,11 @@ list:
 
 # Build the kernel
 kernel-r: libapex-r $(ASM_OBJECTS) $(CPP_OBJECTS)
-	rm kernel.eld || true
+	rm kernel.elf || true
 	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS) $(CPP_OBJECTS) ./libapex/libapex.a $(LFLAGS)
 
 kernel-d: libapex-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D)
-	rm kernel.eld || true
+	rm kernel.elf || true
 	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) ./libapex/libapex.a $(LFLAGS) $(LFLAGS_D)
 
 #Build the common system framework

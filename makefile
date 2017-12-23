@@ -8,7 +8,7 @@ list:
 	@echo 'vdisk              : Builds the virtual disk VM image from ./disk/'
 	@echo 'vdisk-r (kernel)   : Builds the virtual disk VM image from ./disk/'
 	@echo 'vdisk-d (kernel-d) : Buidls the virtual disk VM image from ./disk/'
-	@echo 'qemu(vdisk)        : Boots the created VM disk'
+	@echo 'qemu               : Boots the created VM disk'
 	@echo 'qemu-r(vdisk-r)    : Boots the created VM disk'
 	@echo 'qemu-d(vdisk-d)    : Boots the created VM disk'
 	@echo 'badclean           : Cleans up everything from a bad vdisk build'
@@ -61,7 +61,7 @@ vdisk-r: kernel-r vdisk
 vdisk-d: kernel-d vdisk
 
 .PHONY: qemu
-qemu: vdisk
+qemu:
 	qemu-system-i386 -drive 'file=disk.img,format=raw'
 
 .PHONY: qemu-r
@@ -71,8 +71,8 @@ qemu-d: vdisk-d
 	qemu-system-i386 -S -s -drive 'file=disk.img,format=raw'
 
 # Cleans up from a bad/partial disk build
-.PHONY:bad-clean
-bad-clean:
+.PHONY:badclean
+badclean:
 	sudo umount disk.img.d || true
 	sudo losetup -d /dev/loop0 || true
 	rmdir disk.img.d || true

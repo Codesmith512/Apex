@@ -1,6 +1,10 @@
 #pragma once
 
+/* APEX */
 #include "libapex.hpp"
+
+/* Compiler */
+#include <stdint.h>
 
 STL_BEGIN
 
@@ -19,7 +23,11 @@ public:
 
   /* Concatenation */
   stack_string& operator+=(const stack_string& other);
-  stack_string operator+(const stack_string& other) const
+  stack_string& operator+=(uint32_t i);
+
+  /* Operator+ For all += types */
+  template<typename T>
+  stack_string operator+(T other) const
   { return stack_string(*this) += other; }
 
   /* Character extraction */

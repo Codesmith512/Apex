@@ -16,8 +16,16 @@ cout_t& cout_t::operator<<(const char* string)
   char format = 0x0f;
   for(const char* c = string; *c; ++c)
   {
-    *(vram_ptr++) = *c;
-    *(vram_ptr++) = format;
+    switch(*c)
+    {
+    case '\n':
+      cur.x = WIDTH-1;
+      break;
+
+    default:
+      *(vram_ptr++) = *c;
+      *(vram_ptr++) = format;
+    }
 
     ++cur.x;
     if(cur.x == WIDTH)
