@@ -1,6 +1,8 @@
 *.a
 *.ao
+*.ao_d
 *.co
+*.co_d
 *.bin
 *.elf
 *.img
