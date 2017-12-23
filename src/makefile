@@ -1,7 +1,8 @@
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
 CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex
-CFLAGS_D=-g
+CFLAGS_R=-O3
+CFLAGS_D=-O0 -g
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 LFLAGS_D=
 
@@ -30,12 +31,14 @@ list:
 	@echo 'libapex-d          : Builds the common system framework with debug symbols'
 	@echo 'kernel-r(libapex)  : Builds the kernel'
 	@echo 'kernel-d(libapex)  : Builds the kernel with debug symbols'
+	@echo 'clean              : Cleans up all intermediate files'
+	@echo 'distclean(clean)   : Cleans up all distributable files'
 	@echo
 
 
 # Build any .co file from it's .cpp file
 %.co : %.cpp $(CPP_HEADERS)
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS_R)
 
 # Build any .ao file from it's .asm file
 %.ao : %.asm
