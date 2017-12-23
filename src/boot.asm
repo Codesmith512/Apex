@@ -1,6 +1,5 @@
 ; #############################
 ; APEX OS Stage One Bootloader
-; @author John Wargo
 ; #############################
 
 ; @func [[noreturn]] void kernel_main()

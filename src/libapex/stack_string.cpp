@@ -1,4 +1,5 @@
 #include "stack_string.hpp"
+#include "asm_helpers.hpp"
 
 STL_BEGIN
 
@@ -53,7 +54,7 @@ stack_string& stack_string::operator+=(uint32_t i)
 /* Ptr Concatenation */
 stack_string& stack_string::operator+=(void* ptr)
 {
-  intptr_t p = reinterpret_cast<intptr_t>(ptr);
+  uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
   char hex_chars[8];
 
   for(short s = 0; s < 8; ++s)
@@ -65,7 +66,8 @@ stack_string& stack_string::operator+=(void* ptr)
     if(c < 0xa)
       c += '0';
     else
-      c += 'a';
+      c += 'a' - 0xa;
+
     hex_chars[s] = c;
     p = p / 0x10;
   }
