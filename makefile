@@ -62,13 +62,13 @@ vdisk-d: kernel-d vdisk
 
 .PHONY: qemu
 qemu:
-	qemu-system-i386 -drive 'file=disk.img,format=raw'
+	qemu-system-i386 -drive 'file=disk.img,format=raw' -m 1G
 
 .PHONY: qemu-r
 qemu-r: vdisk-r qemu
 .PHONY: qemu-d
 qemu-d: vdisk-d
-	qemu-system-i386 -S -s -drive 'file=disk.img,format=raw'
+	qemu-system-i386 -S -s -drive 'file=disk.img,format=raw' -m 1G
 
 # Cleans up from a bad/partial disk build
 .PHONY:badclean
