@@ -24,6 +24,7 @@ public:
   /* Concatenation */
   stack_string& operator+=(const stack_string& other);
   stack_string& operator+=(uint32_t i);
+  stack_string& operator+=(void* p);
 
   /* Operator+ For all += types */
   template<typename T>

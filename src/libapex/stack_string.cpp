@@ -50,6 +50,34 @@ stack_string& stack_string::operator+=(uint32_t i)
   return *this;
 }
 
+/* Ptr Concatenation */
+stack_string& stack_string::operator+=(void* ptr)
+{
+  intptr_t p = reinterpret_cast<intptr_t>(ptr);
+  char hex_chars[8];
+
+  for(short s = 0; s < 8; ++s)
+    hex_chars[s] = '0';
+
+  for(short s = 7; s < 8 && p; --s)
+  {
+    char c = p % 0x10;
+    if(c < 0xa)
+      c += '0';
+    else
+      c += 'a';
+    hex_chars[s] = c;
+    p = p / 0x10;
+  }
+
+  push_back('0');
+  push_back('x');
+  for(short s = 0; s < 8; ++s)
+    push_back(hex_chars[s]);
+
+  return *this;
+}
+
 /* Safe push_back */
 void stack_string::push_back(char c)
 {
