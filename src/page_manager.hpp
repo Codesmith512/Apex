@@ -120,6 +120,8 @@ public:
    * @param page    The page to free
    */
   void free_phys_page(void* page);
+  void free_phys_page(uintptr_t page)
+  { free_phys_page(reinterpret_cast<void*>(page)); }
 
   /** Access Methods */
   bool is_enabled() const { return enabled; }

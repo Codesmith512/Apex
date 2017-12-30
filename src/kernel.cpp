@@ -3,6 +3,7 @@
 #include "page_manager.hpp"
 
 /* APEX */
+#include "helpers.hpp"
 #include "stdio.hpp"
 #include "stack_string.hpp"
 
@@ -18,6 +19,7 @@ extern "C"
     /* Print initialization message */
     const char* msg = "Beginning kernel boot sequence.\n\n";
     apex::cout << msg;
+    page_manager pager(__page_directory);
 
     /* Parse Multiboot Tags */
     apex::cout << "Parsing multiboot tags...\n";
@@ -38,18 +40,24 @@ extern "C"
             string s("  [");
             s += i;
             s += "] base: ";
-            s += entry->base_ptr();
+            s += entry->get_base_ptr();
 
-            uint32_t l = static_cast<uint32_t>(entry->length);
+            uint32_t l = entry->get_length_32();
             void* l_p = reinterpret_cast<void*>(l);
             s += " length: ";
             s += l_p;
 
             s += " type: ";
-            s += entry->type;
+            s += entry->get_type_32();
 
             s += "\n";
             apex::cout << s.c_str();
+
+            if(entry->get_length_32() >= 0x400000)
+              for(uintptr_t page = apex::ceil(entry->get_base_32(), static_cast<uint32_t>(0x400000));
+                  page < entry->get_base_32() + entry->get_length_32();
+                  page += 0x400000)
+                pager.free_phys_page(page);
           }
         }
         break;
@@ -61,12 +69,11 @@ extern "C"
 
     /* Enable paging  */
     apex::cout << "Linear mapping kernel + vram page...";
-    page_manager pager(__page_directory);
     // Linear-address kernel page
     void* kernel_addr = reinterpret_cast<void*>(&kernel_main);
     pager.alloc_page(kernel_addr, kernel_addr);
     pager.enable_paging();
-    apex::cout << " WE FUCKING MADE IT!!!";
+    apex::cout << " Done.";
 
     /* Stall */
     for(;;);

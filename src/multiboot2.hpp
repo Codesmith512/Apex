@@ -51,19 +51,27 @@ namespace Multiboot2
   {
     struct Entry
     {
+    public:
+      uint32_t get_base_32() const
+      { return static_cast<uint32_t>(base_addr); }
+
+      void* get_base_ptr() const
+      { return reinterpret_cast<void*>(get_base_32()); }
+
+      uint32_t get_length_32() const
+      { return static_cast<uint32_t>(length); }
+
+      uint32_t get_type_32() const
+      { return static_cast<uint32_t>(type); }
+
+      const Entry* next() const
+      { return this + 1; }
+
+    private:
       uint64_t base_addr;
       uint64_t length;
       uint32_t type;
       uint32_t reserved;
-
-      void* base_ptr() const
-      {
-        uint32_t b = base_addr;
-        return reinterpret_cast<void*>(b);
-      }
-
-      const Entry* next() const
-      { return this + 1; }
     };
 
     uint32_t entry_size;

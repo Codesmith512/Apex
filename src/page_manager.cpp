@@ -98,7 +98,6 @@ page_manager::~page_manager()
 /* Enable paging */
 void page_manager::enable_paging()
 {
-  __debug();
   if(current_manager)
     current_manager->set_enabled(false);
   
@@ -141,14 +140,14 @@ void page_manager::alloc_page(void* v, void* p)
 void* page_manager::alloc_page()
 {
   // Not implemented
-  __debug();
+  __break();
 }
 
 /* Free's the given page */
 void page_manager::free_page(void* page)
 {
   // Not implemented
-  __debug();
+  __break();
 }
 
 /* Marks the given physical page as free */
@@ -156,5 +155,6 @@ void page_manager::free_phys_page(void* phys)
 {
   uintptr_t page = reinterpret_cast<uintptr_t>(phys) >> 22;
   uint8_t bit = page % 32;
-  pmem_map[page] = pmem_map[page] & ~(1 << bit);
+  uint16_t indx = page / 32;
+  pmem_map[indx] = pmem_map[indx] & ~(1 << bit);
 }
