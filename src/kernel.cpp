@@ -1,5 +1,6 @@
-/* Multiboot2 */
+/* Kernel */
 #include "multiboot2.hpp"
+#include "page_manager.hpp"
 
 /* APEX */
 #include "stdio.hpp"
@@ -10,12 +11,13 @@
  */
 extern "C"
 {
-  [[noreturn]] void kernel_main(const Multiboot2::Tag_Entry* tags)
+  [[noreturn]] void kernel_main(page_manager::page_directory* __page_directory, const Multiboot2::Tag_Entry* tags)
   {
     using string = apex::stack_string;
 
     /* Print initialization message */
-    apex::cout << "Beginning kernel boot sequence.\n\n";
+    const char* msg = "Beginning kernel boot sequence.\n\n";
+    apex::cout << msg;
 
     /* Parse Multiboot Tags */
     apex::cout << "Parsing multiboot tags...\n";
@@ -56,6 +58,15 @@ extern "C"
         apex::cout << "  Ignored.\n";
       }
     }
+
+    /* Enable paging  */
+    apex::cout << "Linear mapping kernel + vram page...";
+    page_manager pager(__page_directory);
+    // Linear-address kernel page
+    void* kernel_addr = reinterpret_cast<void*>(&kernel_main);
+    pager.alloc_page(kernel_addr, kernel_addr);
+    pager.enable_paging();
+    apex::cout << " WE FUCKING MADE IT!!!";
 
     /* Stall */
     for(;;);

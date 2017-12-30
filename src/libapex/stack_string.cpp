@@ -1,7 +1,7 @@
 #include "stack_string.hpp"
 #include "asm_helpers.hpp"
 
-STL_BEGIN
+APEX_BEGIN
 
 /* Initialize data to 0, then push string back */
 stack_string::stack_string(const char* s /* = "" */)
@@ -88,4 +88,4 @@ void stack_string::push_back(char c)
     end = 0;
 }
 
-STL_END
+APEX_END

@@ -1,11 +1,12 @@
 ; #########################
 ; APEX OS Assembly Helpers
 ; #########################
+[bits 32]
 
 ; @func void __debugbreak()
 ; Creates an infinite loop, until cx is set to 0
-global __debugbreak
-__debugbreak:
+global __asm_debugbreak
+__asm_debugbreak:
   ; Setup stack frame
   push ebp
   mov ebp, esp

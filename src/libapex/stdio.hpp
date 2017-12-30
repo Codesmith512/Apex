@@ -2,7 +2,7 @@
 
 #include "libapex.hpp"
 
-STL_BEGIN
+APEX_BEGIN
 
 /**
 * @class cout_t
@@ -18,4 +18,4 @@ public:
 
 static cout_t cout;
 
-STL_END
+APEX_END

@@ -6,7 +6,7 @@
 /* Compiler */
 #include <stdint.h>
 
-STL_BEGIN
+APEX_BEGIN
 
 /**
  * @class stack_string
@@ -53,4 +53,4 @@ private:
 };
 
 
-STL_END
+APEX_END

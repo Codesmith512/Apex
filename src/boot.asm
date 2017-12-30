@@ -1,6 +1,7 @@
 ; #############################
 ; APEX OS Stage One Bootloader
 ; #############################
+[bits 32]
 
 ; @func [[noreturn]] void kernel_main()
 ; The main function of the kernel -- returning hangs the computer
@@ -33,12 +34,15 @@ header:
 ; ####################################
 ; Allocate memory for the 16KiB stack
 ; ####################################
-
 section .bss
 align 16
 stack_bottom:
 resb 16384
 stack_top:
+
+align 4096
+__page_directory:
+resb 4096
 
 ; ##################################
 ; Actual executable code goes here!
@@ -77,6 +81,7 @@ _boot:
   mov esp, stack_top    ; Setup the stack
   call loadGDT          ; Setup the flat GDT and registers
   push ebx              ; Push the pointer to multiboot2 info
+  push __page_directory
   call kernel_main      ; Invoke kernel
   cli                   ; Clear interrupts to prevent crashes
 .hang:

@@ -1,2 +1,2 @@
-#define STL_BEGIN namespace apex {
-#define STL_END }
+#define APEX_BEGIN namespace apex {
+#define APEX_END }

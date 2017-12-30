@@ -2,7 +2,7 @@
 CC=i686-elf-g++
 CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex
 CFLAGS_R=-O3
-CFLAGS_D=-O0 -g
+CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 LFLAGS_D=
 

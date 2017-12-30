@@ -7,7 +7,7 @@ struct Cursor
 { unsigned short x, y; };
 static Cursor cur {0,0};
 
-STL_BEGIN
+APEX_BEGIN
 
 /* Stream out operator */
 cout_t& cout_t::operator<<(const char* string)
@@ -39,4 +39,4 @@ cout_t& cout_t::operator<<(const char* string)
   return *this;
 }
 
-STL_END
+APEX_END
