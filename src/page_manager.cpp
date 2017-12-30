@@ -1,4 +1,4 @@
-#include "Page_Manager.hpp"
+#include "page_manager.hpp"
 
 /* APEX */
 #include "asm_helpers.hpp"
@@ -6,21 +6,21 @@
 /* Assembly helper functions */
 extern "C"
 {
-  void __asm_enable_paging(const Page_Manager::Page_Directory*);
+  void __asm_enable_paging(const page_manager::page_directory*);
   void __asm_disable_paging();
 }
 
 /* The current page manager */
-static Page_Manager* current_manager = 0;
+static page_manager* current_manager = 0;
 
 /* Page directory constructor */
-Page_Manager::Page_Directory::Page_Directory()
+page_manager::page_directory::page_directory()
 {
   reset();
 }
 
 /* Reset */
-void Page_Manager::Page_Directory::reset()
+void page_manager::page_directory::reset()
 {
   present = false;
   write_access = false;
@@ -37,7 +37,7 @@ void Page_Manager::Page_Directory::reset()
 }
 
 /* Manage physical RAM page */
-void* Page_Manager::Page_Directory::set_phys_address(void* p)
+void* page_manager::page_directory::set_phys_address(void* p)
 {
   uintptr_t ptr = reinterpret_cast<uintptr_t>(p);
   table_ptr = ptr >> 22;
@@ -45,35 +45,35 @@ void* Page_Manager::Page_Directory::set_phys_address(void* p)
   return p;
 }
 
-void* Page_Manager::Page_Directory::get_phys_address() const
+void* page_manager::page_directory::get_phys_address() const
 {
   return reinterpret_cast<void*>((table_ptr << 22) & 0xffa00000);
 }
 
 /* Manage user-space access */
-bool Page_Manager::Page_Directory::set_user_access(bool _user_access)
+bool page_manager::page_directory::set_user_access(bool _user_access)
 {
   return (user_access = _user_access);
 }
 
-bool Page_Manager::Page_Directory::can_user_access() const
+bool page_manager::page_directory::can_user_access() const
 {
   return user_access;
 }
 
 /* Manage write access */
-bool Page_Manager::Page_Directory::set_write_access(bool _write_access)
+bool page_manager::page_directory::set_write_access(bool _write_access)
 {
   return (write_access = _write_access);
 }
 
-bool Page_Manager::Page_Directory::has_write_access() const
+bool page_manager::page_directory::has_write_access() const
 {
   return write_access;
 }
 
 /* Page manager constructor */
-Page_Manager::Page_Manager(Page_Directory* _directory)
+page_manager::page_manager(page_directory* _directory)
   :directory(_directory)
 {
   /* Reset the directory */
@@ -90,7 +90,7 @@ Page_Manager::Page_Manager(Page_Directory* _directory)
 }
 
 /* Reset */
-void Page_Manager::reset(Page_Directory* _directory)
+void page_manager::reset(page_directory* _directory)
 {
   /* Copypasta destructor */
   disable_paging();
@@ -112,13 +112,13 @@ void Page_Manager::reset(Page_Directory* _directory)
 }
 
 /* Page manager destructor */
-Page_Manager::~Page_Manager()
+page_manager::~page_manager()
 {
   disable_paging();
 }
 
 /* Enable paging */
-void Page_Manager::enable_paging()
+void page_manager::enable_paging()
 {
   if(current_manager)
     current_manager->set_enabled(false);
@@ -129,7 +129,7 @@ void Page_Manager::enable_paging()
 }
 
 /* Disable paging */
-void Page_Manager::disable_paging()
+void page_manager::disable_paging()
 {
   if(current_manager == this)
   {
@@ -140,17 +140,17 @@ void Page_Manager::disable_paging()
 }
 
 /* Gets the current page manager */
-Page_Manager* Page_Manager::get_current_manager()
+page_manager* page_manager::get_current_manager()
 {
   return current_manager;
 }
 
 /* Allocates a specific page */
-void Page_Manager::alloc_page(void* v, void* p)
+void page_manager::alloc_page(void* v, void* p)
 {
   uintptr_t virt = reinterpret_cast<uintptr_t>(v);
 
-  Page_Directory& dir = directory[virt >> 22];
+  page_directory& dir = directory[virt >> 22];
   dir.set_phys_address(p);
   dir.set_write_access(true);
 
@@ -159,21 +159,21 @@ void Page_Manager::alloc_page(void* v, void* p)
 }
 
 /* Allocates the next available page */
-void* Page_Manager::alloc_page()
+void* page_manager::alloc_page()
 {
   // Not implemented
   __break();
 }
 
 /* Free's the given page */
-void Page_Manager::free_page(void* page)
+void page_manager::free_page(void* page)
 {
   // Not implemented
   __break();
 }
 
 /* Marks the given physical page as free */
-void Page_Manager::free_phys_page(void* phys)
+void page_manager::free_phys_page(void* phys)
 {
   uintptr_t page = reinterpret_cast<uintptr_t>(phys) >> 22;
   uint8_t bit = page % 32;
@@ -182,7 +182,7 @@ void Page_Manager::free_phys_page(void* phys)
 }
 
 /* Marks the given physical page as allocated */
-void Page_Manager::alloc_phys_page(void* phys)
+void page_manager::alloc_phys_page(void* phys)
 {
   uintptr_t page = reinterpret_cast<uintptr_t>(phys) >> 22;
   uint8_t bit = page % 32;

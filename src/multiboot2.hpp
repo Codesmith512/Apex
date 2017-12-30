@@ -6,17 +6,17 @@
 /**
  * Provides C++ data structs for working with GNU's multiboot2 header
  */
-namespace Multiboot2
+namespace multiboot2
 {
   /**
    * A generic tag of unknown type
    */
-  struct Tag_Generic
+  struct tag_generic
   {
     uint32_t type;
     uint32_t size;
 
-    const Tag_Generic* next() const
+    const tag_generic* next() const
     {
       intptr_t p = reinterpret_cast<intptr_t>(this);
       p += size;
@@ -24,30 +24,30 @@ namespace Multiboot2
       if(padding)
         padding = 8 - padding;
       p += padding;
-      return reinterpret_cast<Tag_Generic*>(p);
+      return reinterpret_cast<tag_generic*>(p);
     }
   };
 
   /**
    * The entry/starting tag
    */
-  struct Tag_Entry
+  struct tag_entry
   {
     uint32_t total_size;
     uint32_t reserved;
 
-    const Tag_Generic* first() const
+    const tag_generic* first() const
     {
       intptr_t p = reinterpret_cast<intptr_t>(this);
-      p += sizeof(Tag_Entry);
-      return reinterpret_cast<Tag_Generic*>(p);
+      p += sizeof(tag_entry);
+      return reinterpret_cast<tag_generic*>(p);
     }
   };
 
   /**
    * The specific tag for the Memory Map
    */
-  struct Tag_MemoryMap : public Tag_Generic
+  struct tag_memory_map : public tag_generic
   {
     struct Entry
     {
@@ -80,11 +80,11 @@ namespace Multiboot2
     const Entry* first_entry() const
     {
       intptr_t p = reinterpret_cast<intptr_t>(this);
-      p += sizeof(Tag_MemoryMap);
+      p += sizeof(tag_memory_map);
       return reinterpret_cast<Entry*>(p);
     }
 
     uint32_t entry_count() const
-    { return (size - sizeof(Tag_MemoryMap)) / entry_size; }
+    { return (size - sizeof(tag_memory_map)) / entry_size; }
   };
 };

@@ -1,8 +1,8 @@
-#include "Kernel.hpp"
+#include "kernel.hpp"
 
 /* Kernel */
-#include "Multiboot2.hpp"
-#include "Page_Manager.hpp"
+#include "multiboot2.hpp"
+#include "page_manager.hpp"
 
 /* APEX */
 #include "asm_helpers.hpp"
@@ -15,15 +15,15 @@
  */
 extern "C"
 {
-  [[noreturn]] void kernel_main(Page_Manager::Page_Directory* page_dir, const Multiboot2::Tag_Entry* tags)
+  [[noreturn]] void kernel_main(page_manager::page_directory* page_dir, const multiboot2::tag_entry* tags)
   {
-    Kernel k(page_dir, tags);
+    kernel k(page_dir, tags);
     for(;;);
   }
 }
 
 /* Constructor */
-Kernel::Kernel(Page_Manager::Page_Directory* page_dir, const Multiboot2::Tag_Entry* tags)
+kernel::kernel(page_manager::page_directory* page_dir, const multiboot2::tag_entry* tags)
   :pager(page_dir)
 {
     using string = apex::stack_string;
@@ -34,7 +34,7 @@ Kernel::Kernel(Page_Manager::Page_Directory* page_dir, const Multiboot2::Tag_Ent
 
     /* Parse Multiboot Tags */
     apex::cout << "Parsing multiboot tags...\n";
-    for(const Multiboot2::Tag_Generic* tag = tags->first();
+    for(const multiboot2::tag_generic* tag = tags->first();
         tag->type != 0; tag = tag->next())
     {
       apex::cout << (string("Tag [") + tag->type + "]... ").c_str();
@@ -44,8 +44,8 @@ Kernel::Kernel(Page_Manager::Page_Directory* page_dir, const Multiboot2::Tag_Ent
       case 6:
         {
           apex::cout << "Memory Map!\n";
-          const Multiboot2::Tag_MemoryMap* mmap = reinterpret_cast<const Multiboot2::Tag_MemoryMap*>(tag);
-          const Multiboot2::Tag_MemoryMap::Entry* entry = mmap->first_entry();
+          const multiboot2::tag_memory_map* mmap = reinterpret_cast<const multiboot2::tag_memory_map*>(tag);
+          const multiboot2::tag_memory_map::Entry* entry = mmap->first_entry();
           for(unsigned int i = 0; i < mmap->entry_count(); ++i, entry = entry->next())
           {
             string s("  [");
@@ -87,7 +87,7 @@ Kernel::Kernel(Page_Manager::Page_Directory* page_dir, const Multiboot2::Tag_Ent
 }
 
 /* Hang Destructor */
-Kernel::~Kernel()
+kernel::~kernel()
 {
   __break();
 }

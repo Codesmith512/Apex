@@ -4,21 +4,21 @@
 #include <stdint.h>
 
 /**
- * @class Page_Manager
+ * @class page_manager
  * @brief manages the paging system, using 4MiB pages
  */
-class Page_Manager
+class page_manager
 {
 public:
 
   /**
    * Manages a single page directory
    */
-  class Page_Directory
+  class page_directory
   {
   public:
     /* Constructor */
-    Page_Directory();
+    page_directory();
 
     /* Resets the directory to it's default value */
     void reset();
@@ -69,15 +69,15 @@ public:
    *
    * @param directory     The start of the 4KiB aligned page directory to manage
    */
-  Page_Manager(Page_Directory* directory);
+  page_manager(page_directory* directory);
 
   /**
    * Reset function -- re-initializes the object
    */
-  void reset(Page_Directory* directory);
+  void reset(page_directory* directory);
 
   /* Destructor (does NOT free the directory) */
-  ~Page_Manager();
+  ~page_manager();
 
   /**
    * Enables paging if not already enabled
@@ -95,7 +95,7 @@ public:
   void disable_paging();
 
   /* The currently enabled page manager -- null if none is enabled */
-  static Page_Manager* get_current_manager();
+  static page_manager* get_current_manager();
 
   /**
    * Allocates and maps the specified virtual page 
@@ -143,7 +143,7 @@ public:
 private:
 
   /* The actual page directory listings */
-  Page_Directory* directory;
+  page_directory* directory;
 
   /* The virtual memory bitfield map (0=free) */
   uint32_t vmem_map[256];
