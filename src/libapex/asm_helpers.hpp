@@ -15,4 +15,9 @@ extern "C"
 /**
  * Same as above, but only in debug mode
  */
-void __debug();
+void __debugbreak();
+
+/**
+ * Infinite loop of breakpoints
+ */
+[[noreturn]] void __break();

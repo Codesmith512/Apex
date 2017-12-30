@@ -6,3 +6,9 @@ void __debug()
   __asm_debugbreak();
 #endif
 }
+
+void __break()
+{
+  for(;;)
+    __asm_debugbreak();
+}
