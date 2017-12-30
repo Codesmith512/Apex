@@ -158,3 +158,12 @@ void page_manager::free_phys_page(void* phys)
   uint16_t indx = page / 32;
   pmem_map[indx] = pmem_map[indx] & ~(1 << bit);
 }
+
+/* Marks the given physical page as allocated */
+void page_manager::alloc_phys_page(void* phys)
+{
+  uintptr_t page = reinterpret_cast<uintptr_t>(phys) >> 22;
+  uint8_t bit = page % 32;
+  uint16_t indx = page / 32;
+  pmem_map[indx] = pmem_map[indx] | (1 << bit);
+}

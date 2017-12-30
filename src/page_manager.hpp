@@ -117,11 +117,20 @@ public:
   /**
    * Marks a portion of physical RAM as free,
    *   allowing it to be allocated again.
-   * @param page    The page to free
+   * @param page    The address of the page to free
    */
   void free_phys_page(void* page);
   void free_phys_page(uintptr_t page)
   { free_phys_page(reinterpret_cast<void*>(page)); }
+
+  /**
+   * Marks a portion of physical RAM as allocated,
+   *   removing it from the allocation pool.
+   * @param page    The address of the page to free.
+   */
+  void alloc_phys_page(void* page);
+  void alloc_phys_page(uintptr_t page)
+  { alloc_phys_page(reinterpret_cast<void*>(page)); }
 
   /** Access Methods */
   bool is_enabled() const { return enabled; }
