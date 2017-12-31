@@ -85,9 +85,16 @@ kernel::kernel(page_manager::page_directory* page_dir, const multiboot2::tag_ent
   pager.enable_paging();
   apex::cout << " Done.\n";
 
-  /* Attempt to allocate a page */
+  /* Allocate new page */
   void* new_page = pager.alloc_page();
-  apex::cout << (string("Allocated page: ") + new_page).c_str();
+
+  int* p = reinterpret_cast<int*>(new_page);
+  *p = 0;
+
+  /* Free new page */
+  pager.free_page(new_page);
+
+  apex::cout << "Test";
 }
 
 /* Hang Destructor */

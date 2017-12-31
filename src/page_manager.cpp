@@ -47,7 +47,7 @@ void* page_manager::page_directory::set_phys_address(void* p)
 
 void* page_manager::page_directory::get_phys_address() const
 {
-  return reinterpret_cast<void*>((table_ptr << 22) & 0xffa00000);
+  return reinterpret_cast<void*>(table_ptr << 22);
 }
 
 /* Manage user-space access */
@@ -207,8 +207,11 @@ void* page_manager::alloc_page()
 /* Free's the given page */
 void page_manager::free_page(void* page)
 {
-  // Not implemented
-  __break();
+  uintptr_t vpage = reinterpret_cast<uintptr_t>(page) >> 22;
+  free_virt_page(page);
+  free_phys_page(directory[vpage].get_phys_address());
+  directory[vpage].reset();
+  update_paging();
 }
 
 /* Marks the given physical page as free */
