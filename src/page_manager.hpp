@@ -71,11 +71,6 @@ public:
    */
   page_manager(page_directory* directory);
 
-  /**
-   * Reset function -- re-initializes the object
-   */
-  void reset(page_directory* directory);
-
   /* Destructor (does NOT free the directory) */
   ~page_manager();
 
@@ -85,6 +80,12 @@ public:
    * Sets this as the current manager
    */
   void enable_paging();
+
+  /**
+   * Updates the CPU after changing the paging information,
+   *   but only if this is the current manager.
+   */
+  void update_paging();
 
   /**
    * If this is the current manager
@@ -135,6 +136,24 @@ public:
    */
   void alloc_phys_page(void* page);
   void alloc_phys_page(uintptr_t page)
+  { alloc_phys_page(reinterpret_cast<void*>(page)); }
+
+  /**
+   * Marks a portion of virtual RAM as free,
+   *   allowing it to be allocated again.
+   * @param page    The address of the page to free
+   */
+  void free_virt_page(void* page);
+  void free_virt_page(uintptr_t page)
+  { free_phys_page(reinterpret_cast<void*>(page)); }
+
+  /**
+   * Marks a portion of virtual RAM as allocated,
+   *   removing it from the allocation pool.
+   * @param page    The address of the page to free.
+   */
+  void alloc_virt_page(void* page);
+  void alloc_virt_page(uintptr_t page)
   { alloc_phys_page(reinterpret_cast<void*>(page)); }
 
   /** Access Methods */

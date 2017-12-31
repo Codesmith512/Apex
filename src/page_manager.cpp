@@ -89,28 +89,6 @@ page_manager::page_manager(page_directory* _directory)
     pmem_map[i] = 0xffffffff;
 }
 
-/* Reset */
-void page_manager::reset(page_directory* _directory)
-{
-  /* Copypasta destructor */
-  disable_paging();
-
-  /* Copypasta constructor */
-  directory = _directory;
-
-  /* Reset the directory */
-  for(unsigned short s = 0; s < 1024; ++s)
-    directory[s].reset();
-
-  /* Mark all virtual memory as free */
-  for(uint32_t i = 0; i < 256; ++i)
-    vmem_map[i] = 0x00000000;
-
-  /* Mark all physical memory as allocated */
-  for(uint32_t i = 0; i < 256; ++i)
-    pmem_map[i] = 0xffffffff;
-}
-
 /* Page manager destructor */
 page_manager::~page_manager()
 {
@@ -122,10 +100,17 @@ void page_manager::enable_paging()
 {
   if(current_manager)
     current_manager->set_enabled(false);
-  
-  __asm_enable_paging(directory);
+
   current_manager = this;
   enabled = true;
+  update_paging();
+}
+
+/* Update paging */
+void page_manager::update_paging()
+{
+  if(enabled)
+    __asm_enable_paging(directory);
 }
 
 /* Disable paging */
@@ -148,21 +133,75 @@ page_manager* page_manager::get_current_manager()
 /* Allocates a specific page */
 void page_manager::alloc_page(void* v, void* p)
 {
-  uintptr_t virt = reinterpret_cast<uintptr_t>(v);
+  alloc_virt_page(v);
+  alloc_phys_page(p);
 
+  uintptr_t virt = reinterpret_cast<uintptr_t>(v);
   page_directory& dir = directory[virt >> 22];
   dir.set_phys_address(p);
   dir.set_write_access(true);
 
-  if(enabled)
-    __asm_enable_paging(directory);
+  update_paging();
 }
 
 /* Allocates the next available page */
 void* page_manager::alloc_page()
 {
-  // Not implemented
-  __break();
+  /* Locate the next free page */
+  uint16_t vindx = 0;
+  uint8_t vbit = 0;
+  for(; vindx < 256; ++vindx)
+  {
+    /* Scan virtual memory map for a free page */
+    if(vmem_map[vindx] != 0xffffffff)
+    {
+      /* Locate bit */
+      for(; vbit < 32; ++vbit)
+        if(!(vmem_map[vindx] & (1 << vbit)))
+          break;
+
+      break;
+    }
+  }
+
+  /* No available virtual pages */
+  if(vindx >= 256)
+    __break();
+
+  /* Locate the next free page */
+  uint16_t pindx = 0;
+  uint8_t pbit = 0;
+  for(; pindx < 256; ++pindx)
+  {
+    /* Scan virtual memory map for a free page */
+    if(pmem_map[pindx] != 0xffffffff)
+    {
+      /* Locate bit */
+      for(; pbit < 32; ++pbit)
+        if(!(pmem_map[pindx] & (1 << pbit)))
+          break;
+
+      break;
+    }
+  }
+
+  /* No available physical pages */
+  if(pindx >= 256)
+    __break();
+
+  /* Allocate */
+  uint32_t vpage = ((vindx * 32) + vbit);
+  uint32_t ppage = ((pindx * 32) + pbit);
+  void* vptr = reinterpret_cast<void*>(vpage * 0x400000);
+  void* pptr = reinterpret_cast<void*>(ppage * 0x400000);
+  alloc_virt_page(vptr);
+  alloc_phys_page(pptr);
+
+  directory[vpage].set_phys_address(pptr);
+  directory[vpage].set_write_access(true);
+  update_paging();
+
+  return vptr;
 }
 
 /* Free's the given page */
@@ -188,4 +227,22 @@ void page_manager::alloc_phys_page(void* phys)
   uint8_t bit = page % 32;
   uint16_t indx = page / 32;
   pmem_map[indx] = pmem_map[indx] | (1 << bit);
+}
+
+/* Marks the given virtual page as free */
+void page_manager::free_virt_page(void* virt)
+{
+  uintptr_t page = reinterpret_cast<uintptr_t>(virt) >> 22;
+  uint8_t bit = page % 32;
+  uint16_t indx = page / 32;
+  vmem_map[indx] = vmem_map[indx] & ~(1 << bit);
+}
+
+/* Marks the given virtual page as allocated */
+void page_manager::alloc_virt_page(void* virt)
+{
+  uintptr_t page = reinterpret_cast<uintptr_t>(virt) >> 22;
+  uint8_t bit = page % 32;
+  uint16_t indx = page / 32;
+  vmem_map[indx] = vmem_map[indx] | (1 << bit);
 }

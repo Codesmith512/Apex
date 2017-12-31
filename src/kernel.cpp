@@ -83,7 +83,11 @@ kernel::kernel(page_manager::page_directory* page_dir, const multiboot2::tag_ent
   void* kernel_addr = reinterpret_cast<void*>(&kernel_main);
   pager.alloc_page(kernel_addr, kernel_addr);
   pager.enable_paging();
-  apex::cout << " Done.";
+  apex::cout << " Done.\n";
+
+  /* Attempt to allocate a page */
+  void* new_page = pager.alloc_page();
+  apex::cout << (string("Allocated page: ") + new_page).c_str();
 }
 
 /* Hang Destructor */
