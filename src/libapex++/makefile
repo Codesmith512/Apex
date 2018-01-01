@@ -1,10 +1,15 @@
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex -Ilibapex++
+AR=i686-elf-ar
+CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -Wno-unused-variable -I.
 CFLAGS_R=-O3
 CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
+LFLAGS_R=
 LFLAGS_D=
+ARFLAGS=rcs
+ARFLAGS_R=
+ARFLAGS_D=
 
 # Define c++ source, header, and object files
 CPP_SOURCES=$(wildcard *.cpp)
@@ -27,16 +32,11 @@ ASM_OBJECTS_D=$(ASM_SOURCES:.asm=.ao_d)
 list:
 	@echo 'target(deps)       : Description'
 	@echo
-	@echo 'libapex-r          : Builds the common system framework'
-	@echo 'libapex-d          : Builds the common system framework with debug symbols'
 	@echo 'libapex++-r        : Builds the C++ STL'
-	@echo 'libapex++-d        : Builds the C++ STL with debug symbols'
-	@echo 'kernel-r(libapex)  : Builds the kernel'
-	@echo 'kernel-d(libapex)  : Builds the kernel with debug symbols'
+	@echo 'libapex++-d        : Builds the C++ STL with debugg symbols'
 	@echo 'clean              : Cleans up all intermediate files'
 	@echo 'distclean(clean)   : Cleans up all distributable files'
 	@echo
-
 
 # Build any .co file from it's .cpp file
 %.co : %.cpp $(CPP_HEADERS)
@@ -54,41 +54,21 @@ list:
 %.ao_d : %.asm
 	$(NASM) $(NASM_FLAGS) $(NASM_FLAGS_D) -o $@ $<
 
-#Build the common system framework
-.PHONY: libapex-r
-libapex-r:
-	make -C libapex libapex-r
+# Build the STL
+libapex++-r: $(ASM_OBJECTS) $(CPP_OBJECTS)
+	rm libapex++.a || true
+	$(AR) $(ARFLAGS) $(ARFLAGS_R) libapex.a $^
 
-.PHONY: libapex-d
-libapex-d:
-	make -C libapex libapex-d
+libapex++-d: $(ASM_OBJECTS_D) $(CPP_OBJECTS_D)
+	rm libapex++.a || true
+	$(AR) $(ARFLAGS) $(ARFLAGS_D) libapex++.a $^
 
-# Build the C++ STL
-.PHONY: libapex++-r
-libapex++-r:
-	make -C libapex++ libapex++-r
-
-.PHONY: libapex++-d
-libapex++-d:
-	make -C libapex++ libapex++-d
-
-# Build the kernel
-kernel-r: libapex-r libapex++-r $(ASM_OBJECTS) $(CPP_OBJECTS)
-	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS) $(CPP_OBJECTS) ./libapex/libapex.a $(LFLAGS)
-
-kernel-d: libapex-d libapex++-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D)
-	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) ./libapex/libapex.a $(LFLAGS) $(LFLAGS_D)
-
-# Clean
+# Clean rule
 .PHONY: clean
 clean:
-	make -C libapex clean
 	rm -f *.ao *.ao_d *.co *.co_d
 
-# Clean all
+# Cleans all virtual device targets
 .PHONY: distclean
 distclean: clean
-	make -C libapex distclean
 	rm -f *.elf *.a
