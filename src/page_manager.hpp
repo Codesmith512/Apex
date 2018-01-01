@@ -63,6 +63,11 @@ public:
   };
 
   /**
+   * Default constructor -- make sure to call init(page_directory*)
+   */
+  page_manager();
+
+  /**
    * Constructor
    * -- All virtual ram starts off free
    * -- All physical RAM starts off allocated
@@ -70,6 +75,7 @@ public:
    * @param directory     The start of the 4KiB aligned page directory to manage
    */
   page_manager(page_directory* directory);
+  void init(page_directory* directory);
 
   /* Destructor (does NOT free the directory) */
   ~page_manager();

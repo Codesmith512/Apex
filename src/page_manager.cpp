@@ -72,11 +72,24 @@ bool page_manager::page_directory::has_write_access() const
   return write_access;
 }
 
+page_manager::page_manager()
+  :directory(0)
+{
+  apex::__debug();
+}
+
 /* Page manager constructor */
 page_manager::page_manager(page_directory* _directory)
-  :directory(_directory)
+  :page_manager()
+{
+  init(_directory);
+}
+
+/* Initialization */
+void page_manager::init(page_directory* _directory)
 {
   /* Reset the directory */
+  directory = _directory;
   for(unsigned short s = 0; s < 1024; ++s)
     directory[s].reset();
 
@@ -166,7 +179,7 @@ void* page_manager::alloc_page()
 
   /* No available virtual pages */
   if(vindx >= 256)
-    __break();
+    apex::__break();
 
   /* Locate the next free page */
   uint16_t pindx = 0;
@@ -187,7 +200,7 @@ void* page_manager::alloc_page()
 
   /* No available physical pages */
   if(pindx >= 256)
-    __break();
+    apex::__break();
 
   /* Allocate */
   uint32_t vpage = ((vindx * 32) + vbit);

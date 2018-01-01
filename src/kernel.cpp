@@ -100,5 +100,5 @@ kernel::kernel(page_manager::page_directory* page_dir, const multiboot2::tag_ent
 /* Hang Destructor */
 kernel::~kernel()
 {
-  __break();
+  apex::__break();
 }
