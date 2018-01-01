@@ -3,9 +3,9 @@
 ; #############################
 [bits 32]
 
-; @func [[noreturn]] void kernel_main()
-; The main function of the kernel -- returning hangs the computer
-extern kernel_main
+; @func void kernel_init()
+; The initialization function for the kernel
+extern kernel_init
 
 ; #################
 ; Multiboot Header
@@ -78,11 +78,12 @@ GDT:
 ; The initial entry point -- returning is UB
 global _boot
 _boot:
+  cli                   ; No interrupts yet -- no IDT
   mov esp, stack_top    ; Setup the stack
   call loadGDT          ; Setup the flat GDT and registers
   push ebx              ; Push the pointer to multiboot2 info
   push __page_directory
-  call kernel_main      ; Invoke kernel
+  call kernel_init      ; Invoke kernel to setup paging+heap
   cli                   ; Clear interrupts to prevent crashes
 .hang:
   hlt                   ; Stop the processor!
