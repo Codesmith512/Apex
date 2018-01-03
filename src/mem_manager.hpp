@@ -35,21 +35,14 @@ public:
   void init(page_manager* pager);
 
   /**
-   * Classic memory allocation
-   *
-   * @param size    The size of the allocation to make
-   * @return        The start of the allocation
-   */
-  void* malloc(std::size_t size);
-
-  /**
    * Aligned memory allocation
    * 
    * @param size        The size of the allocation to make
    * @param alignment   The alignment of the allocation (must be a power of 2 <= size)
+   *                    Default alignment rules still apply, so 0=default
    * @return            The start of the allocation
    */
-  void* malloc(std::size_t size, std::size_t alignment)
+  void* malloc(std::size_t size, std::size_t alignment = 0)
 
   /**
    * Classic memory free
@@ -59,16 +52,21 @@ public:
   void free(void* ptr);
 
 private:
-  /* Returns the page map handling a given pointer */
-  static page_map* get_page_map(void* ptr);
-
-  /* Returns the page map for a page index (page 1 = (*)0x00400000)  (or indx+bit for page_bitmap 0,1 = (*)0x00400000) */
+  /* Returns the page map for a page index (page 1 = (*)0x00400000) */
   static page_map* get_page_map(uint8_t page);
-  static page_map* get_page_map(uint8_t indx, uint8_t bit);
 
   /* Page manager to use */
   page_manager* pager;
 
   /* Page bitfield */
   uint32_t page_bitmap[256];
+
+  /* Tests a specific page index */
+  bool test_page(uint32_t page);
+
+  /* Allocates a page index */
+  void alloc_page(uint32_t page);
+
+  /* Frees a page */
+  void free_page(uint32_t page);
 }
