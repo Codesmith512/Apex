@@ -11,74 +11,29 @@ class page_manager
 {
 public:
 
-  /**
-   * Manages a single page directory
-   */
-  class page_directory
-  {
-  public:
-    /* Constructor */
-    page_directory();
+  /* A single page directory */
+  class page_directory;
 
-    /* Resets the directory to it's default value */
-    void reset();
+  /* NOT CONSTRUCTABLE */
+  page_manager()                    = delete;
+  page_manager(const page_manager&) = delete;
+  page_manager(page_manager&&)      = delete;
 
-    /* Manages the pointer to physical RAM */
-    void* set_phys_address(void*);
-    void* get_phys_address() const;
+  /* NOT ASSIGNABLE */
+  page_manager&   operator=(const page_manager&)  = delete;
+  void            operator=(page_manager&&)       = delete;
 
-    /* Manages whether or not user-space can access the page */
-    bool set_user_access(bool);
-    bool can_user_access() const;
-
-    /* Manages the write permission for the page */
-    bool set_write_access(bool);
-    bool has_write_access() const;
-
-  private:
-    /* True if the page is present */
-    unsigned present  : 1;
-    /* True if the page is RW, false for R- */
-    unsigned write_access : 1;
-    /* True if user-space has access */
-    unsigned user_access : 1;
-    /* True to enable write-through caching, false for write-back */
-    unsigned write_through : 1;
-    /* True to disable caching the page in the TLB */
-    unsigned cache_disabled : 1;
-    /* Set to true on access */
-    unsigned accessed : 1;
-    /* Should always be 0 */
-    unsigned zero : 1;
-    /* True for 4MiB pages, false for 1MiB */
-    unsigned large_pages : 1;
-    /* Unused */
-    unsigned ignored : 1;
-    /* Free for OS use */
-    unsigned os_use : 3;
-    /* Unused to ensure 4MiB physical paging */
-    unsigned padding : 10;
-    /* Pointer to 4MiB physical page address */
-    unsigned table_ptr : 10;
-  };
+  /* NOT DESTRUCTABLE */
+  ~page_manager() = delete;
 
   /**
-   * Default constructor -- make sure to call init(page_directory*)
-   */
-  page_manager();
-
-  /**
-   * Constructor
+   * Initializer method
    * -- All virtual ram starts off free
    * -- All physical RAM starts off allocated
    *
    * @param directory     The start of the 4KiB aligned page directory to manage
    */
-  page_manager(page_directory* directory);
   void init(page_directory* directory);
-
-  /* Destructor (does NOT free the directory) */
-  ~page_manager();
 
   /**
    * Enables paging if not already enabled

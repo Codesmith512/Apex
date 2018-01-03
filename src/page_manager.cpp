@@ -13,6 +13,57 @@ extern "C"
 /* The current page manager */
 static page_manager* current_manager = 0;
 
+/**
+ * Manages a single page directory
+ */
+class page_manager::page_directory
+{
+public:
+  /* Constructor */
+  page_directory();
+
+  /* Resets the directory to it's default value */
+  void reset();
+
+  /* Manages the pointer to physical RAM */
+  void* set_phys_address(void*);
+  void* get_phys_address() const;
+
+  /* Manages whether or not user-space can access the page */
+  bool set_user_access(bool);
+  bool can_user_access() const;
+
+  /* Manages the write permission for the page */
+  bool set_write_access(bool);
+  bool has_write_access() const;
+
+private:
+  /* True if the page is present */
+  unsigned present  : 1;
+  /* True if the page is RW, false for R- */
+  unsigned write_access : 1;
+  /* True if user-space has access */
+  unsigned user_access : 1;
+  /* True to enable write-through caching, false for write-back */
+  unsigned write_through : 1;
+  /* True to disable caching the page in the TLB */
+  unsigned cache_disabled : 1;
+  /* Set to true on access */
+  unsigned accessed : 1;
+  /* Should always be 0 */
+  unsigned zero : 1;
+  /* True for 4MiB pages, false for 1MiB */
+  unsigned large_pages : 1;
+  /* Unused */
+  unsigned ignored : 1;
+  /* Free for OS use */
+  unsigned os_use : 3;
+  /* Unused to ensure 4MiB physical paging */
+  unsigned padding : 10;
+  /* Pointer to 4MiB physical page address */
+  unsigned table_ptr : 10;
+};
+
 /* Page directory constructor */
 page_manager::page_directory::page_directory()
 {
@@ -70,19 +121,6 @@ bool page_manager::page_directory::set_write_access(bool _write_access)
 bool page_manager::page_directory::has_write_access() const
 {
   return write_access;
-}
-
-page_manager::page_manager()
-  :directory(0)
-{
-  apex::__debug();
-}
-
-/* Page manager constructor */
-page_manager::page_manager(page_directory* _directory)
-  :page_manager()
-{
-  init(_directory);
 }
 
 /* Initialization */

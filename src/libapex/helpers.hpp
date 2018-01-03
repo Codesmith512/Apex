@@ -12,7 +12,7 @@ APEX_BEGIN
  * @return        The next multiple of mult after num (or num if it is a multiple)
  */
 template<typename T>
-T ceil(const T& num, const T& mult)
+constexpr T ceil(const T& num, const T& mult)
 {
   T mod = num % mult;
   if(!mod)
