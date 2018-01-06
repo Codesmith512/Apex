@@ -6,4 +6,4 @@
 *.bin
 *.elf
 *.img
-*/include/*
+include
