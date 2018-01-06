@@ -63,6 +63,11 @@ public:
    */
   void free(void* ptr);
 
+  /**
+   * Returns the number of allocated blocks
+   */
+  std::size_t get_alloc_count() { return allocated_blocks; }
+
 private:
   /* The number of user-allocated blocks in this page */
   std::size_t allocated_blocks;
@@ -252,7 +257,12 @@ void mem_manager::free(void* ptr)
 
   /* Free the page */
   free_page(page);
-  get_page_map(page)->free(ptr);
+  page_map* page_map_p = get_page_map(page);
+  page_map_p->free(ptr);
+
+  if(!page_map_p->get_alloc_count())
+    pager->free_page(page_map_p);
+  free_page(page);
 }
 
 /* Page index to page map conversion */

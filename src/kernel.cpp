@@ -100,8 +100,6 @@ extern "C"
 
     delete i;
 
-    *i = 0;
-
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";
   }
