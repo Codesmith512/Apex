@@ -7,7 +7,6 @@
 #include <std_external>
 
 /* APEX */
-#include <asm_helpers>
 #include <helpers>
 #include <stdio>
 #include <stack_string>
@@ -102,6 +101,9 @@ extern "C"
 
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";
+
+    apex::__debug();
+    apex::__break();
   }
 }
 

@@ -1,7 +1,7 @@
 #include "page_manager"
 
 /* APEX */
-#include "asm_helpers"
+#include <helpers>
 
 /* Assembly helper functions */
 extern "C"
