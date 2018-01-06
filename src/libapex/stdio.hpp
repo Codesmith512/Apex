@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libapex.hpp"
+#include "libapex"
 
 APEX_BEGIN
 

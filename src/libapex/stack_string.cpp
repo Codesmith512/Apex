@@ -1,5 +1,5 @@
-#include "stack_string.hpp"
-#include "asm_helpers.hpp"
+#include "stack_string"
+#include "asm_helpers"
 
 APEX_BEGIN
 

@@ -1,16 +1,16 @@
 /* Kernel */
-#include "mem_manager.hpp"
-#include "multiboot2.hpp"
-#include "page_manager.hpp"
+#include "mem_manager"
+#include "multiboot2"
+#include "page_manager"
 
 /* STL */
-#include <std_external.hpp>
+#include <std_external>
 
 /* APEX */
-#include <asm_helpers.hpp>
-#include <helpers.hpp>
-#include <stdio.hpp>
-#include <stack_string.hpp>
+#include <asm_helpers>
+#include <helpers>
+#include <stdio>
+#include <stack_string>
 
 /* Get a static pager with static memory & no constructor call */
 static char pager_memory[sizeof(page_manager)];

@@ -1,4 +1,4 @@
-#include "stdio.hpp"
+#include "stdio"
 
 #define WIDTH 80
 #define HEIGHT 25

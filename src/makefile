@@ -1,14 +1,20 @@
+# Define projects layout
+INC_DIR=./include
+PROJ_DEPS=libapex libapex++
+
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-std=c++17 -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex -Ilibapex++
+CFLAGS=-std=c++17 -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I$(INC_DIR) $(foreach proj,$(PROJ_DEPS),-I./$(proj)/include)
 CFLAGS_R=-O3
 CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
 LFLAGS_D=
+LIB_DEPS=$(foreach proj,$(PROJ_DEPS),./$(proj)/$(proj).a)
 
 # Define c++ source, header, and object files
 CPP_SOURCES=$(wildcard *.cpp)
 CPP_HEADERS=$(wildcard *.hpp)
+CPP_INC_HEADERS=$(addprefix $(INC_DIR)/, $(basename $(CPP_HEADERS)))
 CPP_OBJECTS=$(CPP_SOURCES:.cpp=.co)
 CPP_OBJECTS_D=$(CPP_SOURCES:.cpp=.co_d)
 
@@ -37,9 +43,13 @@ list:
 	@echo 'distclean(clean)   : Cleans up all distributable files'
 	@echo
 
+# Copies all .hpp files into $(INC_DIR)
+$(INC_DIR)/% : %.hpp
+	mkdir -p $(INC_DIR) && true
+	cp $< $@
 
 # Build any .co file from it's .cpp file
-%.co : %.cpp $(CPP_HEADERS)
+%.co : %.cpp $(CPP_INC_HEADERS)
 	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS_R)
 
 # Build any .ao file from it's .asm file
@@ -47,7 +57,7 @@ list:
 	$(NASM) $(NASM_FLAGS) -o $@ $<
 
 # Build any .co_d file from it's .cpp file, but add debug flags
-%.co_d : %.cpp $(CPP_HEADERS)
+%.co_d : %.cpp $(CPP_INC_HEADERS)
 	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS_D)
 
 # Build any .ao_d file from it's .asm file, but add debug flags
@@ -73,13 +83,13 @@ libapex++-d:
 	make -C libapex++ libapex++-d
 
 # Build the kernel
-kernel-r: libapex-r libapex++-r $(ASM_OBJECTS) $(CPP_OBJECTS)
+kernel-r: libapex-r libapex++-r $(ASM_OBJECTS) $(CPP_OBJECTS) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS) $(CPP_OBJECTS) ./libapex/libapex.a $(LFLAGS)
+	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS) $(CPP_OBJECTS) $(LIB_DEPS) $(LFLAGS)
 
-kernel-d: libapex-d libapex++-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D)
+kernel-d: libapex-d libapex++-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) ./libapex/libapex.a $(LFLAGS) $(LFLAGS_D)
+	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(LIB_DEPS) $(LFLAGS) $(LFLAGS_D)
 
 # Clean
 .PHONY: clean
@@ -94,3 +104,4 @@ distclean: clean
 	make -C libapex distclean
 	make -C libapex++ distclean
 	rm -f *.elf *.a
+	rm -rf $(INC_DIR)

@@ -1,7 +1,7 @@
 #pragma once
 
 /* APEX */
-#include "libapex.hpp"
+#include "libapex"
 
 /* Compiler */
 #include <stdint.h>

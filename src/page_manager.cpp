@@ -1,7 +1,7 @@
-#include "page_manager.hpp"
+#include "page_manager"
 
 /* APEX */
-#include "asm_helpers.hpp"
+#include "asm_helpers"
 
 /* Assembly helper functions */
 extern "C"

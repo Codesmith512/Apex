@@ -1,11 +1,11 @@
 #pragma once
 
 /* STL */
-#include "libstl.hpp"
-#include "cstddef.hpp"
+#include "libstl"
+#include "cstddef"
 
 /* STL - malloc+free */
-#include "std_external.hpp"
+#include "std_external"
 
 STL_BEGIN
 

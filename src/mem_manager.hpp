@@ -4,7 +4,7 @@
 class page_manager;
 
 /* STL */
-#include <cstddef.hpp>
+#include <cstddef>
 
 /* Compiler */
 #include <stdint.h>

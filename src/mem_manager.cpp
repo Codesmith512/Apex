@@ -1,11 +1,11 @@
-#include "mem_manager.hpp"
+#include "mem_manager"
 
 /* Kernel */
-#include "page_manager.hpp"
+#include "page_manager"
 
 /* APEX */
-#include <asm_helpers.hpp>
-#include <helpers.hpp>
+#include <asm_helpers>
+#include <helpers>
 
 /* 4MiB Pages */
 static constexpr std::size_t PAGE_SIZE = 0x00400000;

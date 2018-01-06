@@ -1,6 +1,6 @@
 #pragma once
 
-#include "libstl.hpp"
+#include "libstl"
 
 STL_BEGIN
 
