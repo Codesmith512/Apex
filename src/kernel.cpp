@@ -93,11 +93,14 @@ extern "C"
     apex::cout << " Done.\n";
 
     /* Test Integer Alloc */
-    int* i = reinterpret_cast<int*>(std::malloc(sizeof(int)));
-    *i = 5;
+    int* i = new int(5);
 
-    apex::cout << (string(" i : ") + i).c_str();
-    apex::cout << (string("*i : ") + *i).c_str();
+    apex::cout << (string("   i : ") + i + "\n").c_str();
+    apex::cout << (string("  *i : ") + *i + "\n").c_str();
+
+    delete i;
+
+    *i = 0;
 
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";

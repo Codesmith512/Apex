@@ -4,7 +4,8 @@ INC_DIR=./include
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
 AR=i686-elf-ar
-CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -Wno-unused-variable -I$(INC_DIR)
+IGNORE_WARNINGS=unused-variable unused-parameter
+CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti $(foreach warn,$(IGNORE_WARNINGS),-Wno-$(warn)) -I$(INC_DIR)
 CFLAGS_R=-O3
 CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc

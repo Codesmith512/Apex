@@ -4,7 +4,8 @@ PROJ_DEPS=libapex libapex++
 
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-std=c++17 -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I$(INC_DIR) $(foreach proj,$(PROJ_DEPS),-I./$(proj)/include)
+IGNORE_WARNINGS=
+CFLAGS=-std=c++17 -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti $(foreach warn,$(IGNORE_WARNINGS),-Wno-$(warn)) -I$(INC_DIR) $(foreach proj,$(PROJ_DEPS),-I./$(proj)/include)
 CFLAGS_R=-O3
 CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
