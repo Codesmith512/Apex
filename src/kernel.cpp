@@ -1,6 +1,10 @@
 /* Kernel */
+#include "mem_manager.hpp"
 #include "multiboot2.hpp"
 #include "page_manager.hpp"
+
+/* STL */
+#include <std_external.hpp>
 
 /* APEX */
 #include <asm_helpers.hpp>
@@ -11,6 +15,10 @@
 /* Get a static pager with static memory & no constructor call */
 static char pager_memory[sizeof(page_manager)];
 static page_manager& pager = *reinterpret_cast<page_manager*>(pager_memory);
+
+/* Get a static memory manager with static memory & no constructor call */
+static char m_manager_memory[sizeof(mem_manager)];
+static mem_manager& m_manager = *reinterpret_cast<mem_manager*>(m_manager_memory);
 
 /**
  * The kernel main function and entry point
@@ -79,7 +87,39 @@ extern "C"
     pager.enable_paging();
     apex::cout << " Done.\n";
 
+    /* Enable the memory manager */
+    apex::cout << "  Initializing dynamic memory...";
+    m_manager.init(&pager);
+    apex::cout << " Done.\n";
+
+    /* Test Integer Alloc */
+    int* i = reinterpret_cast<int*>(std::malloc(sizeof(int)));
+    *i = 5;
+
+    apex::cout << (string(" i : ") + i).c_str();
+    apex::cout << (string("*i : ") + *i).c_str();
+
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";
   }
 }
+
+/**
+ * Define classic C functions for STL
+ */
+STL_BEGIN
+extern "C"
+{
+  /* Malloc */
+  void* malloc(size_t size)
+  { return m_manager.malloc(size); }
+
+  /* Aligned Malloc -- not sure why, but align comes first in std c */
+  void* aligned_alloc(size_t alloc, size_t size)
+  { return m_manager.malloc(size, alloc); }
+
+  /* Free */
+  void free(void* ptr)
+  { m_manager.free(ptr); }
+}
+STL_END

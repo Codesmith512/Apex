@@ -1,6 +1,6 @@
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
-CFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex -Ilibapex++
+CFLAGS=-std=c++17 -ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti -I. -Ilibapex -Ilibapex++
 CFLAGS_R=-O3
 CFLAGS_D=-O0 -g -D_DEBUG
 LFLAGS=-ffreestanding -O2 -nostdlib -lgcc
@@ -85,10 +85,12 @@ kernel-d: libapex-d libapex++-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D)
 .PHONY: clean
 clean:
 	make -C libapex clean
+	make -C libapex++ clean
 	rm -f *.ao *.ao_d *.co *.co_d
 
 # Clean all
 .PHONY: distclean
 distclean: clean
 	make -C libapex distclean
+	make -C libapex++ distclean
 	rm -f *.elf *.a

@@ -5,7 +5,7 @@
 #include "cstddef.hpp"
 
 /* STL - malloc+free */
-#include "external.hpp"
+#include "std_external.hpp"
 
 STL_BEGIN
 

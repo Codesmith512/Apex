@@ -3,6 +3,9 @@
 /* Kernel */
 class page_manager;
 
+/* STL */
+#include <cstddef.hpp>
+
 /* Compiler */
 #include <stdint.h>
 
@@ -42,7 +45,7 @@ public:
    *                    Default alignment rules still apply, so 0=default
    * @return            The start of the allocation
    */
-  void* malloc(std::size_t size, std::size_t alignment = 0)
+  void* malloc(std::size_t size, std::size_t alignment = 0);
 
   /**
    * Classic memory free
@@ -69,4 +72,4 @@ private:
 
   /* Frees a page */
   void free_page(uint32_t page);
-}
+};

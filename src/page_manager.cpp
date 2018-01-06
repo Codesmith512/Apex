@@ -140,12 +140,6 @@ void page_manager::init(page_directory* _directory)
     pmem_map[i] = 0xffffffff;
 }
 
-/* Page manager destructor */
-page_manager::~page_manager()
-{
-  disable_paging();
-}
-
 /* Enable paging */
 void page_manager::enable_paging()
 {

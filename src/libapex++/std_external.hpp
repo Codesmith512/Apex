@@ -1,9 +1,13 @@
 #pragma once
 
+#include "libstl.hpp"
+
+STL_BEGIN
+
 /**
  * Defines external function requirements
  */
-extern
+extern "C++"
 {
 
 }
@@ -22,9 +26,20 @@ extern "C"
   void* malloc(size_t size);
 
   /**
+   * The classic malloc function, but with alignment rules
+   *
+   * @param align   The alignment of the allocation (in bytes)
+   * @param size    The size of the allocation (in bytes)
+   * @return        The start of the allocation
+   */
+  void* aligned_alloc(size_t align, size_t size);
+
+  /**
    * The classic free function
    *
    * @param ptr     The start of the allocation to free
    */
   void free(void* ptr);
 }
+
+STL_END

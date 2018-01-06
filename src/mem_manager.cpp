@@ -3,11 +3,15 @@
 /* Kernel */
 #include "page_manager.hpp"
 
+/* APEX */
+#include <asm_helpers.hpp>
+#include <helpers.hpp>
+
 /* 4MiB Pages */
-static constexpr PAGE_SIZE = 0x00400000;
+static constexpr std::size_t PAGE_SIZE = 0x00400000;
 
 /* Largest allowed allocation */
-static constexpr MAX_ALLOC = 0x00100000;
+static constexpr std::size_t MAX_ALLOC = 0x00100000;
 
 /**
  * @class page_map
@@ -28,9 +32,20 @@ public:
   /* NOT DESTRUCTABLE */
   ~page_map() = delete;
 
-  /* Number of blocks in a page */
+  /* Size of a single block */
   static constexpr uint32_t BLOCK_SIZE = alignof(std::min_align_t);
+  /* Number of blocks in a page */
   static constexpr uint32_t BLOCKS_PER_PAGE = PAGE_SIZE / alignof(std::min_align_t);
+
+  /* Number of elements in the block map */
+  static constexpr uint32_t BLOCK_MAP_SIZE = BLOCKS_PER_PAGE / sizeof(uint32_t);
+  /* Number of bits per element in the block map */
+  static constexpr uint32_t BLOCK_MAP_BITS = 32;
+  
+  /* Number of blocks this objects takes up */
+  /* Note: cannot use sizeof(...) with constexpr inside class.
+     Also cannot use static constexpr outside class as class is private */
+#define PAGE_MAP_RESERVED_BLOCKS (apex::ceil(sizeof(page_map), BLOCK_SIZE) / BLOCK_SIZE)
 
   /**
    * Initializes the page map
@@ -46,14 +61,14 @@ public:
   /**
    * Frees the given allocation
    */
-  void* free(void* ptr);
+  void free(void* ptr);
 
 private:
   /* The number of user-allocated blocks in this page */
-  size_t allocated_blocks;
+  std::size_t allocated_blocks;
 
   /* The block map for allocations in this page */
-  uint32_t block_map[BLOCKS_PER_PAGE / sizeof(uint32_t)];
+  uint32_t block_map[BLOCK_MAP_SIZE];
 
   /* True if the block at the given index is allocated */
   bool test_block(uint32_t block);
@@ -63,9 +78,6 @@ private:
 
   /* Frees the given block */
   void free_block(uint32_t block);
-
-  static constexpr uint32_t BLOCK_MAP_SIZE = BLOCKS_PER_PAGE / sizeof(uint32_t);
-  static constexpr uint32_t BLOCK_MAP_BITS = 32;
 };
 
 /* Initialize a page map */
@@ -77,21 +89,20 @@ void mem_manager::page_map::init()
     block_map[i] = 0;
 
   /* Reserve blocks for page_map */
-  uint32_t block_map_reserve = apex::ceil(sizeof(page_map), BLOCK_SIZE) / BLOCK_SIZE;
-  for(uint32_t i = 0; i < block_map_reserve)
+  for(uint32_t i = 0; i < PAGE_MAP_RESERVED_BLOCKS; ++i)
     alloc_block(i);
 }
 
 /* Aligned Malloc */
-void* mem_manager::page_map::malloc(size_t size, size_t align)
+void* mem_manager::page_map::malloc(std::size_t size, std::size_t align)
 {
   /* Cannot allocate */
-  if(size > MAX_ALLOC || ALIGN > MAX_ALLOC)
+  if(size > MAX_ALLOC || align > MAX_ALLOC)
     apex::__break();
 
   /* Validate alignment */
   {
-    size_t min_align = 1;
+    std::size_t min_align = 1;
     while(min_align <= size)
       min_align *= 2;
     min_align = min_align / 2;
@@ -105,10 +116,10 @@ void* mem_manager::page_map::malloc(size_t size, size_t align)
   align = apex::ceil(align, BLOCK_SIZE) / BLOCK_SIZE;
 
   /* Scan blocks for suitable region */
-  for(uint32_t i = 0; i < BLOCK_MAP_SIZE; i += align)
+  for(uint32_t i = PAGE_MAP_RESERVED_BLOCKS+1; i < BLOCKS_PER_PAGE; i += align)
   {
     /* Test size block */
-    if(!test_block(i-1))
+    if(test_block(i-1))
       continue;
 
     /* Number of contiguous blocks */
@@ -194,16 +205,16 @@ void mem_manager::init(page_manager* _pager)
 
   /* Free all pages */
   for(uint32_t i = 0; i < 256; ++i)
-    page_map[i] = 0;
+    page_bitmap[i] = 0;
 }
 
 /* Malloc */
-void* mem_manager::malloc(size_t size, size_t align)
+void* mem_manager::malloc(std::size_t size, std::size_t align)
 {
   /* Try any/all allocated pages */
   for(uint32_t i = 0; i < 256; ++i)
   {
-    if(!page_map[i])
+    if(!page_bitmap[i])
       continue;
 
     /* Try any valid page in the 32 bit range */
@@ -230,7 +241,7 @@ void* mem_manager::malloc(size_t size, size_t align)
 }
 
 /* Free */
-void* mem_manager::free(void* ptr)
+void mem_manager::free(void* ptr)
 {
   /* Get the page */
   uint32_t page = reinterpret_cast<uintptr_t>(ptr) / PAGE_SIZE;
@@ -245,7 +256,7 @@ void* mem_manager::free(void* ptr)
 }
 
 /* Page index to page map conversion */
-page_map* mem_manager::get_page_map(uint32_t page)
+mem_manager::page_map* mem_manager::get_page_map(uint8_t page)
 {
   return reinterpret_cast<page_map*>(page * PAGE_SIZE);
 }
@@ -253,17 +264,17 @@ page_map* mem_manager::get_page_map(uint32_t page)
 /* Test page map */
 bool mem_manager::test_page(uint32_t page)
 {
-  return page_map[page / 32] & (1 << (page % 32));
+  return page_bitmap[page / 32] & (1 << (page % 32));
 }
 
 /* Allocate page map */
 void mem_manager::alloc_page(uint32_t page)
 {
-  page_map[page / 32] |= (1 << (page % 32));
+  page_bitmap[page / 32] |= (1 << (page % 32));
 }
 
 /* Free page map */
 void mem_manager::free_page(uint32_t page)
 {
-  page_map[page / 32] &= ~(1 << (page % 32));
+  page_bitmap[page / 32] &= ~(1 << (page % 32));
 }
