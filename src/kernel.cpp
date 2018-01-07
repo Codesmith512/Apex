@@ -20,7 +20,15 @@ static char m_manager_memory[sizeof(mem_manager)];
 static mem_manager& m_manager = *reinterpret_cast<mem_manager*>(m_manager_memory);
 
 /**
- * The kernel main function and entry point
+ * The kernel initialization point
+ * Supported Features
+ * - Stack
+ * - GDT
+ *
+ * Unsupported Features
+ * - Paging (must setup)
+ * - Heap (must setup)
+ * - Global static variable initialization
  */
 extern "C"
 {
