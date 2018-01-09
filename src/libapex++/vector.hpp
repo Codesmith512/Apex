@@ -212,16 +212,9 @@ public:
     new (data_last++) T(args...);
   }
 
-  ///** Removes the last element */
-  //enable_if<is_destructable<T>::value> pop_back()
-  //{
-  //  (--data_last)->~T();
-  //}
-//
-  //void pop_back()
-  //{
-  //  --data_last;
-  //}
+  /** Removes the last element */
+  void pop_back()
+  { pop_back_helper(*this); }
 
   /** Resize the vector */
   void resize(size_t new_size)
@@ -239,8 +232,8 @@ public:
   void swap(vector<T>& other)
   {
     data_start = exchange(other.data_start, data_start);
-    data_last = exchange(other.data_start, data_last);
-    data_end = exchange(other.data_start, data_end);
+    data_last = exchange(other.data_last, data_last);
+    data_end = exchange(other.data_end, data_end);
   }
 
 private:
