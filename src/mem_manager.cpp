@@ -3,6 +3,9 @@
 /* Kernel */
 #include "page_manager"
 
+/* STL */
+#include <algorithm>
+
 /* APEX */
 #include <helpers>
 
@@ -105,15 +108,7 @@ void* mem_manager::page_map::malloc(std::size_t size, std::size_t align)
     apex::__break();
 
   /* Validate alignment */
-  {
-    std::size_t min_align = 1;
-    while(min_align <= size)
-      min_align *= 2;
-    min_align = min_align / 2;
-
-    if(min_align > align)
-      align = min_align;
-  }
+  align = std::max(align, alignof(std::min_align_t));
 
   /* Convert size and alignment to be in blocks */
   size = apex::ceil(size, BLOCK_SIZE) / BLOCK_SIZE;
@@ -128,7 +123,7 @@ void* mem_manager::page_map::malloc(std::size_t size, std::size_t align)
 
     /* Number of contiguous blocks */
     uint32_t contig = 0;
-    while(test_block(i + contig) && contig < size - 1) ++contig;
+    while(!test_block(i + contig) && contig < size - 1) ++contig;
 
     /* Suitable allocation found! */
     if(contig >= size - 1)
@@ -247,6 +242,10 @@ void* mem_manager::malloc(std::size_t size, std::size_t align)
 /* Free */
 void mem_manager::free(void* ptr)
 {
+  /* Safety check ptr */
+  if(!ptr)
+    return;
+
   /* Get the page */
   uint32_t page = reinterpret_cast<uintptr_t>(ptr) / PAGE_SIZE;
 
@@ -255,13 +254,14 @@ void mem_manager::free(void* ptr)
     apex::__break();
 
   /* Free the page */
-  free_page(page);
   page_map* page_map_p = get_page_map(page);
   page_map_p->free(ptr);
 
   if(!page_map_p->get_alloc_count())
+  {
     pager->free_page(page_map_p);
-  free_page(page);
+    free_page(page);
+  }
 }
 
 /* Page index to page map conversion */
