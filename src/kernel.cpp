@@ -5,6 +5,7 @@
 
 /* STL */
 #include <std_external>
+#include <vector>
 
 /* APEX */
 #include <helpers>
@@ -99,16 +100,33 @@ extern "C"
     m_manager.init(&pager);
     apex::cout << " Done.\n";
 
-    /* Test Integer Alloc */
-    int* i = new int(5);
-
-    apex::cout << (string("   i : ") + i + "\n").c_str();
-    apex::cout << (string("  *i : ") + *i + "\n").c_str();
-
-    delete i;
-
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";
+
+    std::vector<int> v1;
+    v1.push_back(1);
+    v1.push_back(2);
+    v1.push_back(3);
+
+    std::vector<int> v2(3, 99);
+    v2[0] = 1;
+    v2[1] = 2;
+    v2[2] = 3;
+
+    /* tests */
+    bool t11 = v1 == v2;
+    bool t12 = v1 < v2;
+    bool t13 = v1 <= v2;
+    bool t14 = v1 > v2;
+    bool t15 = v1 >= v2;
+
+    std::swap(v1, v2);
+
+    bool t21 = v1 == v2;
+    bool t22 = v1 < v2;
+    bool t23 = v1 <= v2;
+    bool t24 = v1 > v2;
+    bool t25 = v1 >= v2;
 
     apex::__debug();
     apex::__break();

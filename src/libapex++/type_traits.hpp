@@ -3,39 +3,11 @@
 #include "declval"
 #include "libstl"
 
+#include "type_traits_basic"
 #include "type_traits_function"
 #include "type_traits_reference"
 
 STL_BEGIN
-
-/**
- * Defines a compile-time integral constant
- */
-template<typename T, T v>
-struct integral_constant
-{
-  static constexpr T value = v;
-  using value_type = t;
-  using type = integral_constant;
-  constexpr operator value_type() const { return value; }
-  constexpr value_type operator()() const { return value; }
-};
-
-/**
- * Helper template for boolean integral_constant
- */
-template<bool B>
-using bool_constant = integral_constant<bool, B>;
-using true_type = bool_constant<true>;
-using false_type = bool_constant<false>;
-
-/* Same as true_type, but takes a template param. allowing SFINAE */
-template<typename>
-struct sfinae_true_type : public true_type;
-
-/* Same as false_type, but takes a template param. allowing SFINAE */
-template<typename>
-struct sfinae_false_type : public false_type;
 
 /**
  * Used in SFINAE, if B is true, has a type equal to T
@@ -54,14 +26,19 @@ struct enable_if<true, T>
 namespace detail
 {
   template<typename T>
-  static auto is_dest_helper()->sfinae_true_type<decltype(declval<T>().~T())>;
-
-  template<typename T>
-  static auto is_dest_helper()->false_type;
+  class is_dest_helper
+  {
+  private:
+    template<typename _T>
+    static true_type test() { declval<_T>().~_T(); return true_type(); };
+    static false_type test();
+  public:
+    using value = decltype(test<T>());
+  };
 }
 
 template<typename T>
-struct is_destructable : decltype(detail::is_dest_helper<T>)
+struct is_destructable : public detail::is_dest_helper<T>::value
 { };
 
 /**
@@ -92,34 +69,34 @@ struct remove_const
 
 template<typename T>
 struct remove_const<const T>
-{ using type = T; }
+{ using type = T; };
 
 template<typename T>
 struct remove_volatile
-{ using type = T; }
+{ using type = T; };
 
 template<typename T>
 struct remove_volatile<volatile T>
-{ using type = T; }
+{ using type = T; };
 
 template<typename T>
 struct remove_cv
-{ using type = typename remove_const<typename remove_volatile<T>::type>::type; }
+{ using type = typename remove_const<typename remove_volatile<T>::type>::type; };
 
 /**
  * Functions to add const/volatile
  */
 template<typename T>
 struct add_const
-{ using type = const T; }
+{ using type = const T; };
 
 template<typename T>
 struct add_volatile
-{ using type = volatile T; }
+{ using type = volatile T; };
 
 template<typename T>
 struct add_cv
-{ using type = typename add_const<typename add_volatile<T>::type>::type; }
+{ using type = typename add_const<typename add_volatile<T>::type>::type; };
 
 /**
  * Evaluates to true_type if the given type is void

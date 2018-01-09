@@ -1,9 +1,14 @@
 #pragma once
 
+/* STL */
+#include "algorithm"
 #include "libstl"
-
+#include "new"
 #include "type_traits"
 #include "utility"
+
+/* APEX */
+#include <helpers>
 
 STL_BEGIN
 
@@ -74,7 +79,7 @@ public:
     T* elem = data_start + pos;
     if(elem >= data_last)
       apex::__break();
-    return data_start[pos].get();
+    return data_start[pos];
   }
 
   const T& at(size_t pos) const
@@ -82,15 +87,15 @@ public:
     T* elem = data_start + pos;
     if(elem >= data_last)
       apex::__break();
-    return data_start[pos].get();
+    return data_start[pos];
   }
 
   /** @return the specified element */
   T& operator[](size_t pos)
-  { return data_start[pos].get(); }
+  { return data_start[pos]; }
 
   const T& operator[](size_t pos) const
-  { return data_start[pos].get(); }
+  { return data_start[pos]; }
 
   /** @return the first element */
   T& front()
@@ -136,7 +141,7 @@ public:
 
     /* New allocation */
     size_t s = size();
-    T* new_start = std::malloc(sizeof(T) * cap);
+    T* new_start = reinterpret_cast<T*>(std::malloc(sizeof(T) * cap));
     T* new_last = new_start + s;
     T* new_end = new_start + cap;
 
@@ -188,17 +193,8 @@ public:
    */
 
   /** Erases all elements in the vector (for objects) */
-  enable_if<is_destructable<T>::value> clear()
-  {
-    for(size_t i = 0; data_start + i < data_last; ++i)
-      data_start[i].get().~T();
-
-    data_last = data_start;
-  }
-
-  /** Erases all elements in the vector (for primitives) */
   void clear()
-  { data_last = data_start; }
+  { clear_helper(*this); }
 
   /** Pushes the given element back */
   void push_back(const T& val)
@@ -216,16 +212,16 @@ public:
     new (data_last++) T(args...);
   }
 
-  /** Removes the last element */
-  enable_if<is_destructable<T>::value> pop_back()
-  {
-    (--data_last)->~T();
-  }
-
-  void pop_back()
-  {
-    --data_last;
-  }
+  ///** Removes the last element */
+  //enable_if<is_destructable<T>::value> pop_back()
+  //{
+  //  (--data_last)->~T();
+  //}
+//
+  //void pop_back()
+  //{
+  //  --data_last;
+  //}
 
   /** Resize the vector */
   void resize(size_t new_size)
@@ -240,7 +236,7 @@ public:
   }
 
   /** Swap */
-  void swap(const vector<T>& other)
+  void swap(vector<T>& other)
   {
     data_start = exchange(other.data_start, data_start);
     data_last = exchange(other.data_start, data_last);
@@ -248,6 +244,30 @@ public:
   }
 
 private:
+
+  /* Helper function to use SFINAE properly */
+  template<typename _T>
+  static typename enable_if<is_destructable<_T>::value>::type clear_helper(vector<_T>& vec)
+  {
+    for(size_t i = 0; vec.data_start + i < vec.data_last; ++i)
+      vec.data_start[i].~T();
+
+    vec.data_last = vec.data_start;
+  }
+
+  template<typename _T>
+  static typename enable_if<!is_destructable<_T>::value>::type clear_helper(vector<_T>& vec)
+  { vec.data_last = vec.data_start; }
+
+  /* Helper function to use SFINAE properly */
+  template<typename _T>
+  static typename enable_if<is_destructable<_T>::value>::type pop_back_helper(vector<_T>& vec)
+  { (vec.data_last--)->~T(); }
+
+  template<typename _T>
+  static typename enable_if<!is_destructable<_T>::value>::type pop_back_helper(vector<_T>& vec)
+  { --vec.data_last; }
+
   /* Start to the beginning of allocated data */
   T* data_start;
   /* Element-after the last initialized element */
@@ -284,7 +304,7 @@ bool operator<(const vector<T>& lhs, const vector<U>& rhs)
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
-  for(size_t i = 0; i < std::min(lhs_s, rhs_s); ++i)
+  for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
     if(!(lhs[i] < rhs[i]))
       return false;
 
@@ -297,7 +317,7 @@ bool operator<=(const vector<T>& lhs, const vector<U>& rhs)
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
-  for(size_t i = 0; i < std::min(lhs_s, rhs_s); ++i)
+  for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
     if(!(lhs[i] <= rhs[i]))
       return false;
 
@@ -310,7 +330,7 @@ bool operator>(const vector<T>& lhs, const vector<U>& rhs)
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
-  for(size_t i = 0; i < std::min(lhs_s, rhs_s); ++i)
+  for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
     if(!(lhs[i] > rhs[i]))
       return false;
 
@@ -323,7 +343,7 @@ bool operator>=(const vector<T>& lhs, const vector<U>& rhs)
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
-  for(size_t i = 0; i < std::min(lhs_s, rhs_s); ++i)
+  for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
     if(!(lhs[i] >= rhs[i]))
       return false;
 

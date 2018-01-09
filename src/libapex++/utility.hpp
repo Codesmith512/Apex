@@ -36,7 +36,7 @@ forward(T&& t)
 /* Forward lvalue as lvalue */
 template<typename T>
 typename enable_if<is_lvalue_reference<T>::value, T>::type
-forward(T t)
+forward(T& t)
 { return t; }
 
 /* Do not forward rvalues as lvalues */
@@ -49,7 +49,7 @@ forward(T&& t) = delete;
  */
 template<typename T>
 constexpr typename std::remove_reference<T>::type&& move(T&& t)
-{ return static_cast<typename std::remove_reference<T>::type&&(t); }
+{ return static_cast<typename std::remove_reference<T>::type&&>(t); }
 
 /**
  * Replaces the argument with a new value, returning it's previous value
