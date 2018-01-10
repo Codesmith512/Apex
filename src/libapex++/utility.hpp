@@ -4,6 +4,12 @@
 #include "libstl"
 #include "type_traits"
 
+/**
+ * The definition of the well-documented <utility> file
+ *
+ * http://en.cppreference.com/w/cpp/header/utility
+ */
+
 STL_BEGIN
 
 /**

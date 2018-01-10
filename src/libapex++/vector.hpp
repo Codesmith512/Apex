@@ -15,6 +15,8 @@ STL_BEGIN
 /**
  * @class vector
  * The well defined std::vector class
+ *
+ * http://en.cppreference.com/w/cpp/container/vector
  */
 template<typename T>
 class vector

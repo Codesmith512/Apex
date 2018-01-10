@@ -4,6 +4,13 @@
 #include "cstddef"
 #include "libstl"
 
+
+/**
+ * The definition of the well-documented <new> file
+ *
+ * http://en.cppreference.com/w/cpp/header/new
+ */
+
 /* The type used for alignment (doesn't conflict with std::size_t) */
 STL_BEGIN
 enum class align_val_t : std::size_t {};

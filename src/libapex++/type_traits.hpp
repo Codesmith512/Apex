@@ -7,6 +7,12 @@
 #include "type_traits_function"
 #include "type_traits_reference"
 
+/**
+ * The definition of the well-documented <type_traits> file
+ *
+ * http://en.cppreference.com/w/cpp/header/type_traits
+ */
+
 STL_BEGIN
 
 /**
