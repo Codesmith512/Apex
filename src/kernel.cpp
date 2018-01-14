@@ -4,6 +4,7 @@
 #include "page_manager"
 
 /* STL */
+#include <array>
 #include <std_external>
 #include <vector>
 
@@ -124,6 +125,10 @@ extern "C"
     bool t23 = v1 <= v2;
     bool t24 = v1 > v2;
     bool t25 = v1 >= v2;
+
+    std::array<int, 3> a {{100, 101, 102}};
+    for(const int& i : a)
+      bool b = true;
 
     apex::__debug();
     apex::__break();

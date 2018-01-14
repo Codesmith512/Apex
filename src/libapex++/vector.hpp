@@ -25,6 +25,19 @@ class vector
 {
 public:
   /*
+   * Member types
+   */
+  using value_type = T;
+  using size_type = std::size_t;
+  using difference_type = std::ptrdiff_t;
+  using reference = T&;
+  using const_reference = const T&;
+  using pointer = T*;
+  using const_pointer = const T*;
+  using iterator = random_access_iterator<T>;
+  using const_iterator = const_random_access_iterator<T>;
+
+  /*
    * Constructors
    */
 
@@ -133,6 +146,22 @@ public:
 
   const T* data() const
   { return data_start; }
+
+  /*
+   * Iterators
+   * @incomplete -- missing reverse iterator support
+   */
+  iterator begin()
+  { return iterator(data_start); }
+
+  const_iterator cbegin() const
+  { return const_iterator(data_start); }
+
+  iterator end()
+  { return iterator(data_last); }
+
+  const_iterator cend() const
+  { return const_iterator(data_last); }
 
   /*
    * Capacity Functions
