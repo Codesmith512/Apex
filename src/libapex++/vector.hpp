@@ -3,6 +3,7 @@
 /* STL */
 #include "algorithm"
 #include "common_iterators"
+#include "cstdlib"
 #include "initializer_list"
 #include "libstl"
 #include "new"
@@ -241,6 +242,55 @@ public:
   void clear()
   { clear_helper(*this); }
 
+  /** Inserts an element */
+  void insert(const iterator& it, const T& val)
+  { emplace(it, val); }
+
+  /** Constructs an element in-place */
+  template<typename... Ctor_Args>
+  void emplace(const iterator& it, Ctor_Args... args)
+  {
+    /* Make a reservation if necessary */
+    if(size() == capacity())
+      reserve(size() * 2 + 1);
+
+    /* Move all elements after `it` back */
+    for(T* ptr = data_last; ptr > it.get_ptr(); --ptr)
+    {
+      T* dst = ptr;
+      T* src = ptr - 1;
+
+      new (dst) T(std::move(*src));
+      destroy(*src);
+    }
+
+    /* New element */
+    ++data_last;
+
+    /* Construct new element */
+    new (it.get_ptr()) T(args...);
+  }
+
+  /** Erases a given element */
+  void erase(const iterator& it)
+  {
+    /* Destroy given element */
+    destroy(*it);
+
+    /* Shift all elements forward */
+    for(T* ptr = it.get_ptr(); ptr < data_last; ++ptr)
+    {
+      T* dst = ptr;
+      T* src = ptr + 1;
+
+      new (dst) T(std::move(*src));
+      destroy(*src);
+    }
+
+    /* One less element */
+    --data_last;
+  }
+
   /** Pushes the given element back */
   void push_back(const T& val)
   { emplace_back(val); }
@@ -305,6 +355,15 @@ private:
   template<typename _T>
   static typename enable_if<!is_destructable<_T>::value>::type pop_back_helper(vector<_T>& vec)
   { --vec.data_last; }
+
+  /* Invokes the destructor on an object if present, otherwise, does nothing */
+  template<typename _T>
+  static typename enable_if<is_destructable<_T>::value>::type destroy(_T& element)
+  { element.~_T(); }
+
+  template<typename _T>
+  static typename enable_if<!is_destructable<_T>::value>::type destroy(_T& element)
+  { }
 
   /* Start to the beginning of allocated data */
   T* data_start;
