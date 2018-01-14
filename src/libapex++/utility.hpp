@@ -27,6 +27,12 @@ void swap(T& a, T& b)
  * Used to ensure that a reference type is preserved
  */
 
+/* Forward value as lvalue */
+template<typename T>
+typename enable_if<!is_reference<T>::value, T&>::type
+forward(T& t)
+{ return t; }
+
 /* Forward lvalue as rvalue */
 template<typename T>
 typename enable_if<is_rvalue_reference<T>::value, T&&>::type
@@ -42,7 +48,7 @@ forward(T&& t)
 /* Forward lvalue as lvalue */
 template<typename T>
 typename enable_if<is_lvalue_reference<T>::value, T>::type
-forward(T& t)
+forward(T t)
 { return t; }
 
 /* Do not forward rvalues as lvalues */
