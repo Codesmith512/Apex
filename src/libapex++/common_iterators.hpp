@@ -1,5 +1,6 @@
 #pragma once
 
+#include "cstddef"
 #include "libstl"
 #include "type_traits"
 
@@ -57,15 +58,15 @@ public:
   { return random_access_iterator_ptr_t(ptr++); }
 
   /** Dereference */
-  reference operator*()
+  reference operator*() const
   { return *ptr; }
 
   /** Equality Check */
-  bool operator==(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator==(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return ptr == other.ptr; }
 
   /* Inequality Check */
-  bool operator!=(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator!=(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return !(*this == other); }
 
   /**
@@ -96,32 +97,36 @@ public:
   { return (*this) += (diff * -1); }
 
   /** Addition */
-  random_access_iterator_ptr_t<T, isConst> operator+(difference_type diff)
+  random_access_iterator_ptr_t<T, isConst> operator+(difference_type diff) const
   { return ptr + diff; }
 
   /** Subtraction */
-  random_access_iterator_ptr_t<T, isConst> operator-(difference_type diff)
+  random_access_iterator_ptr_t<T, isConst> operator-(difference_type diff) const
   { return ptr - diff; }
 
   /** Element access */
-  reference operator[](difference_type diff)
+  reference operator[](difference_type diff) const
   { return ptr[diff]; }
 
   /** Less Than */
-  bool operator<(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator<(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return ptr < other.ptr; }
 
   /** Less Than or Equal to */
-  bool operator<=(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator<=(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return ptr <= other.ptr; }
 
   /** Greater Than */
-  bool operator>(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator>(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return ptr > other.ptr; }
 
   /** Greater Than or Equal to */
-  bool operator>=(const random_access_iterator_ptr_t<T, isConst>& other)
+  bool operator>=(const random_access_iterator_ptr_t<T, isConst>& other) const
   { return ptr >= other.ptr; }
+
+  /* Pointer access */
+  pointer get_ptr() const
+  { return ptr; }
 
 private:
   pointer ptr;
