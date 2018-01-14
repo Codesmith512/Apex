@@ -103,10 +103,7 @@ extern "C"
     /* Complete! */
     apex::cout << "<<< Kernel initialization sequence complete. <<<\n";
 
-    std::vector<int> v1;
-    v1.push_back(1);
-    v1.push_back(2);
-    v1.push_back(3);
+    std::vector<int> v1 = {1, 2, 3};
 
     std::vector<int> v2(3, 99);
     v2[0] = 1;

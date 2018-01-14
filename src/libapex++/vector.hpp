@@ -2,6 +2,8 @@
 
 /* STL */
 #include "algorithm"
+#include "common_iterators"
+#include "initializer_list"
 #include "libstl"
 #include "new"
 #include "type_traits"
@@ -35,13 +37,18 @@ public:
 
   }
 
+  /** Size initialization */
+  vector(size_t count)
+  :vector()
+  {
+    resize(count);
+  }
+
   /** Size+Value Initialization */
   vector(size_t count, const T& value = T())
   :vector()
   {
-    resize(count);
-    for(size_t i = 0; i < count; ++i)
-      (*this)[i] = value;
+    resize(count, value);
   }
 
   /** Copy Constructor */
@@ -49,9 +56,8 @@ public:
   {
     size_t elements = other.size();
     reserve(other.capacity());
-    resize(elements);
     for(size_t i = 0; i < elements; ++i)
-      (*this)[i] = other[i];
+      push_back(other[i]);
   }
 
   /** Move constructor */
@@ -61,6 +67,14 @@ public:
   ,data_end(exchange(other.data_end, 0))
   {
 
+  }
+
+  /** Initializer list initialization */
+  vector(std::initializer_list<T> init)
+  {
+    reserve(init.size());
+    for(const T& t : init)
+      push_back(t);
   }
 
   /**
@@ -219,15 +233,15 @@ public:
   { pop_back_helper(*this); }
 
   /** Resize the vector */
-  void resize(size_t new_size)
+  void resize(size_t new_size, const T& value = T())
   {
     /* Increase capacity if necessary */
     if(new_size > capacity())
       reserve(new_size);
 
-    /* Continually push back empty values until new_size is met */
+    /* Continually push back values until new_size is met */
     while(size() < new_size)
-      emplace_back();
+      emplace_back(value);
   }
 
   /** Swap */
