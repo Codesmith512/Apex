@@ -5,5 +5,7 @@
 *.co_d
 *.bin
 *.elf
+*.errlog
 *.img
+*.log
 include

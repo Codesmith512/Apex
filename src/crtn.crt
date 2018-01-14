@@ -1,0 +1,17 @@
+; The "standard" crtn file -- defines the endings of _init and _fini
+
+section .init
+  ; GCC inserts crtend.o::.init here
+  pop ebp
+  ret
+
+extern __cxa_finalize
+section .fini
+  ; GCC inserts crtend.o::fini here
+  sub esp, 4
+  mov [esp], dword 0
+  call __cxa_finalize
+  add esp, 4
+
+  pop ebp
+  ret

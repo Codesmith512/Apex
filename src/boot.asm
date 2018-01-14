@@ -7,6 +7,26 @@
 ; The initialization function for the kernel
 extern kernel_init
 
+; @func void kernel_main()
+; The main function for the kernel
+extern kernel_main
+
+; @func void __asm_break()
+; Performs a hard-break
+extern __asm_break
+
+; @func void __asm_debug()
+; Performs a soft-break
+extern __asm_debug
+
+; @func _init
+; GCC's initialization function
+extern _init
+
+; @func _fini
+; GCC's cleanup function
+extern _fini
+
 ; #################
 ; Multiboot Header
 ; https://www.gnu.org/software/grub/manual/multiboot2/multiboot.html#dir
@@ -31,18 +51,22 @@ header:
   dd 8
 .end:
 
+section .bss
+
+; ############################################
+; Allocate memory for the 4KiB page directory
+; ############################################
+align 4096
+__page_directory:
+resb 4096
+
 ; ####################################
 ; Allocate memory for the 16KiB stack
 ; ####################################
-section .bss
 align 16
 stack_bottom:
 resb 16384
 stack_top:
-
-align 4096
-__page_directory:
-resb 4096
 
 ; ##################################
 ; Actual executable code goes here!
@@ -84,6 +108,20 @@ _boot:
   push ebx              ; Push the pointer to multiboot2 info
   push __page_directory
   call kernel_init      ; Invoke kernel to setup paging+heap
+  add esp, 8            ; Cleanup the stack
+
+  call _init            ; Invoke GCC's initialization function
+
+  call kernel_main      ; Invoke kernel_main
+  cmp ax, 0x00          ; Hard break if main fails
+  je .fini
+  call __asm_break
+
+  .fini:
+  call _fini            ; Invoke GCC's cleanup function
+
+  call __asm_debug      ; Soft break before hanging processor
+
   cli                   ; Clear interrupts to prevent crashes
 .hang:
   hlt                   ; Stop the processor!
@@ -95,7 +133,7 @@ _boot:
 loadGDT:
   lgdt [GDT]
   jmp 0x0008:.reload_segments
-  .reload_segments
+  .reload_segments:
   mov ax, 0x10
   mov ds, ax
   mov es, ax

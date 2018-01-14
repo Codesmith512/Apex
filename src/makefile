@@ -19,6 +19,12 @@ CPP_INC_HEADERS=$(addprefix $(INC_DIR)/, $(basename $(CPP_HEADERS)))
 CPP_OBJECTS=$(CPP_SOURCES:.cpp=.co)
 CPP_OBJECTS_D=$(CPP_SOURCES:.cpp=.co_d)
 
+# C++ CRT* objects
+CRTI_OBJ=crti.crto
+CRTBEGIN_OBJ=$(shell $(CC) $(CFLAGS)  -print-file-name=crtbegin.o)
+CRTEND_OBJ=$(shell $(CC) $(CFLAGS)  -print-file-name=crtend.o)
+CRTN_OBJ=crtn.crto
+
 # Define NASM flags
 NASM=nasm
 NASM_FLAGS=-f elf32
@@ -57,6 +63,10 @@ $(INC_DIR)/% : %.hpp
 %.ao : %.asm
 	$(NASM) $(NASM_FLAGS) -o $@ $<
 
+# Build any .crto file from it's .crt file
+%.crto : %.crt
+	$(NASM) $(NASM_FLAGS) -o $@ $<
+
 # Build any .co_d file from it's .cpp file, but add debug flags
 %.co_d : %.cpp $(CPP_INC_HEADERS)
 	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS_D)
@@ -84,20 +94,20 @@ libapex++-d:
 	make -C libapex++ libapex++-d
 
 # Build the kernel
-kernel-r: libapex-r libapex++-r $(ASM_OBJECTS) $(CPP_OBJECTS) $(CPP_INC_HEADERS)
+kernel-r: libapex-r libapex++-r $(CRTI_OBJ) $(ASM_OBJECTS) $(CPP_OBJECTS) $(CRTN_OBJ) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS) $(CPP_OBJECTS) $(LIB_DEPS) $(LFLAGS)
+	$(CC) -T kernel.ld -o kernel.elf $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(ASM_OBJECTS) $(CPP_OBJECTS) $(CRTEND_OBJ) $(CRTN_OBJ) $(LIB_DEPS) $(LFLAGS)
 
-kernel-d: libapex-d libapex++-d $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CPP_INC_HEADERS)
+kernel-d: libapex-d libapex++-d $(CRTI_OBJ) $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CRTN_OBJ) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
-	$(CC) -T kernel.ld -o kernel.elf $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(LIB_DEPS) $(LFLAGS) $(LFLAGS_D)
+	$(CC) -T kernel.ld -o kernel.elf $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CRTEND_OBJ) $(CRTN_OBJ) $(LIB_DEPS) $(LFLAGS) $(LFLAGS_D)
 
 # Clean
 .PHONY: clean
 clean:
 	make -C libapex clean
 	make -C libapex++ clean
-	rm -f *.ao *.ao_d *.co *.co_d
+	rm -f *.ao *.ao_d *.co *.co_d *.crto
 
 # Clean all
 .PHONY: distclean
