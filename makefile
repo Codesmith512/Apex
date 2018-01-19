@@ -1,3 +1,5 @@
+TERMINAL=gnome-terminal
+
 # Target list
 .PHONY: list
 list:
@@ -84,7 +86,7 @@ qemu-r: vdisk-r
 .PHONY: qemu-d
 qemu-d: vdisk-d
 	qemu-system-i386 -S -s -drive 'file=disk.img,format=raw' -m 1G >qemu.log &>qemu.errlog &
-	gdb -ex 'set disassembly-flavor intel' -ex 'symbol-file src/kernel.elf' -ex 'target remote localhost:1234' -ex 'layout src'
+	$(TERMINAL) -- gdb -ex 'set disassembly-flavor intel' -ex 'symbol-file src/kernel.elf' -ex 'target remote localhost:1234' -ex 'layout src' &
 
 # Cleans up from a bad/partial disk build
 .PHONY:badclean

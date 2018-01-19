@@ -2,7 +2,6 @@
 
 /* STL */
 #include "algorithm"
-#include "common_iterators"
 #include "cstdlib"
 #include "initializer_list"
 #include "libstl"
@@ -85,6 +84,7 @@ public:
 
   /** Initializer list initialization */
   vector(std::initializer_list<T> init)
+  :vector()
   {
     reserve(init.size());
     for(const T& t : init)
@@ -278,7 +278,7 @@ public:
     destroy(*it);
 
     /* Shift all elements forward */
-    for(T* ptr = it.get_ptr(); ptr < data_last; ++ptr)
+    for(T* ptr = it; ptr < data_last; ++ptr)
     {
       T* dst = ptr;
       T* src = ptr + 1;
