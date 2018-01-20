@@ -35,8 +35,8 @@ public:
   using const_reference = const T&;
   using pointer = T*;
   using const_pointer = const T*;
-  using iterator = random_access_iterator<T>;
-  using const_iterator = const_random_access_iterator<T>;
+  using iterator = pointer;
+  using const_iterator = const_pointer;
 
   /*
    * Constructors

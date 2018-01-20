@@ -16,6 +16,17 @@
 STL_BEGIN
 
 /**
+ * Evaluates to T if true, and U otherwise
+ */
+template<bool B, typename T, typename U>
+struct conditional
+{ using type = T; };
+
+template<typename T, typename U>
+struct conditional<false, T, U>
+{ using type = U; };
+
+/**
  * Used in SFINAE, if B is true, has a type equal to T
  */
 template<bool B, typename T = void>

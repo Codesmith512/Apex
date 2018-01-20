@@ -27,8 +27,8 @@ struct array
   using const_reference = const value_type&;
   using pointer = value_type*;
   using const_pointer = const value_type*;
-  using iterator = random_access_iterator<T>;
-  using const_iterator = const_random_access_iterator<T>;
+  using iterator = pointer;
+  using const_iterator = const_pointer;
 
   /**
    * Element access
