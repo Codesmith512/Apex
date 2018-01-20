@@ -85,8 +85,8 @@ extern "C" int kernel_main()
   screen::vga_screen info_screen({0,1}, {80,24});
   screen::vga_screen stat_screen({0,0}, {80,1});
 
-  stat_screen.set_attrib(screen::vga_screen::attrib_t(screen::vga_screen::attrib_t::Color::BLACK,
-                                                      screen::vga_screen::attrib_t::Color::WHITE));
+  stat_screen.push_attrib(screen::vga_screen::attrib_t(screen::vga_screen::attrib_t::Color::BLACK,
+                                                       screen::vga_screen::attrib_t::Color::WHITE));
   stat_screen.scroll();
   stat_screen.move_cursor({1,0});
   stat_screen.push_cursor();

@@ -13,11 +13,11 @@ char* vga_screen::coord::vram_addr() const
 }
 
 /* Construction from Geometry */
-vga_screen::vga_screen(const coord& _origin, const coord& _size)
+vga_screen::vga_screen(coord const& _origin, coord const& _size)
   :cursor_stack({{0,0}})
+  ,attrib_stack({attrib_t()})
   ,origin(_origin)
   ,size(_size)
-  ,attrib(attrib_t::Color::WHITE, attrib_t::Color::BLACK)
 {
 
 }
@@ -47,7 +47,7 @@ void vga_screen::scroll()
   {
     char* dst = (coord(x,size.y-1) + origin).vram_addr();
     dst[0] = ' ';
-    dst[1] = attrib;
+    dst[1] = peek_attrib();
   }
 }
 
@@ -59,15 +59,15 @@ vga_screen& vga_screen::operator<<(char const* str)
 }
 
 /* Moves the current cursor */
-void vga_screen::move_cursor(const coord& pos)
+void vga_screen::move_cursor(coord const& pos)
 { cursor_stack.back() = pos; }
 
 /* Push a copy cursor */
 void vga_screen::push_cursor()
 { cursor_stack.push_back(cursor_stack.back()); }
 
-/* Push a new cursor */
-void vga_screen::push_cursor(const coord& pos)
+/* Push a given cursor */
+void vga_screen::push_cursor(coord const& pos)
 { cursor_stack.push_back(pos); }
 
 /* Pops a cursor */
@@ -78,9 +78,29 @@ void vga_screen::pop_cursor()
     cursor_stack.push_back({0,0});
 }
 
-/* Sets the current attribute */
-void vga_screen::set_attrib(attrib_t _attrib)
-{ attrib = _attrib; }
+/* Peeks the cursor */
+vga_screen::coord const& vga_screen::peek_cursor() const
+{ return cursor_stack.back(); }
+
+/* Push a copy attribute */
+void vga_screen::push_attrib()
+{ attrib_stack.push_back(attrib_stack.back()); }
+
+/* Push a given attribute */
+void vga_screen::push_attrib(attrib_t attrib)
+{ attrib_stack.push_back(attrib); }
+
+/* Pops an attribute */
+void vga_screen::pop_attrib()
+{
+  attrib_stack.pop_back();
+  if(attrib_stack.empty())
+    attrib_stack.push_back(attrib_t());
+}
+
+/* Peeks the attribute stack */
+vga_screen::attrib_t vga_screen::peek_attrib() const
+{ return attrib_stack.back(); }
 
 /* Writes a single character at the cursor */
 void vga_screen::put(char c)
@@ -109,7 +129,7 @@ void vga_screen::put(char c)
     {
       char* p = (cursor + origin).vram_addr();
       p[0] = c;
-      p[1] = attrib;
+      p[1] = peek_attrib();
       ++cursor.x;
     }
   }

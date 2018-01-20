@@ -17,7 +17,12 @@ SCREEN_BEGIN
  * - Origin at upper-left, x-horizontal, y-vertical
  *
  * Cursor
- * - Topmost entry on the stack defines the cursor's location
+ * - The cursor is a marker for the next write operation
+ * - The topmost entry on the cursor stack defines the currently used cursor
+ *
+ * Attribute
+ * - An attribute defines a color setting
+ * - The topmost entry on the attribute stack defines the currently used attribute
  */
 class vga_screen
 {
@@ -41,14 +46,14 @@ public:
 
     char* vram_addr() const;
 
-    coord operator+(const coord& o) const
+    coord operator+(coord const& o) const
     { return coord(x + o.x, y + o.y); }
-    void operator+=(const coord& o)
+    void operator+=(coord const& o)
     { *this = (*this + o); }
 
-    coord operator-(const coord& o) const
+    coord operator-(coord const& o) const
     { return coord(x - o.x, y - o.y); }
-    void operator-=(const coord& o)
+    void operator-=(coord const& o)
     { *this = (*this - o); }
   };
 
@@ -75,11 +80,11 @@ public:
       LIGHT_RED,
       LIGHT_MAGENTA,
       YELLOW,
-      WHITE
+      WHITE,
     };
 
     /* Constructs an attribute from two colors */
-    attrib_t(Color fg, Color bg)
+    attrib_t(Color fg = Color::WHITE, Color bg = Color::BLACK)
     :val((static_cast<char>(bg) << 4) | static_cast<char>(fg))
     { }
 
@@ -97,7 +102,7 @@ public:
    * @param origin  The upper-left most character
    * @param size    The size of the screen
    */
-  vga_screen(const coord& origin, const coord& size);
+  vga_screen(coord const& origin, coord const& size);
 
   /**
    * Writes a c-style string at the cursor
@@ -113,7 +118,7 @@ public:
   /**
    * Moves the current cursor
    */
-  void move_cursor(const coord& pos);
+  void move_cursor(coord const& pos);
 
   /**
    * Pushes a copy of the current cursor
@@ -124,7 +129,7 @@ public:
    * Pushes a new cursor
    * @param pos   The new position for the cursor
    */
-  void push_cursor(const coord& pos);
+  void push_cursor(coord const& pos);
 
   /**
    * Restores the previous cursor
@@ -134,10 +139,32 @@ public:
   void pop_cursor();
 
   /**
-   * Sets the attribute byte
-   * @param attrib -- the new attribute
+   * Returns the current cursor
    */
-  void set_attrib(attrib_t attrib);
+  coord const& peek_cursor() const;
+
+  /**
+   * Pushes a copy of the current attribute
+   */
+  void push_attrib();
+
+  /**
+   * Pushes a new attribute
+   * @param attrib  The new attribute
+   */
+  void push_attrib(attrib_t attrib);
+
+  /**
+   * Restores the previous attribute
+   *
+   * Popping the last attribute pushes the default attribute
+   */
+  void pop_attrib();
+
+  /**
+   * Returns the current attribute
+   */
+  attrib_t peek_attrib() const;
 
 private:
   /* Returns the current vRAM address of the cursor */
@@ -148,10 +175,10 @@ private:
 
   /* The cursor stack */
   std::vector<coord> cursor_stack;
-  /* Screen parameters */
+  /* The attribute stack */
+  std::vector<attrib_t> attrib_stack;
+  /* Screen geometry */
   coord origin, size;
-  /* The attribute byte to write with */
-  attrib_t attrib;
 };
 
 SCREEN_END
