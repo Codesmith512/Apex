@@ -135,7 +135,7 @@ private:
   /* Index OOB -- error (but with dummy return so that get() doesn't break) */
   template<std::size_t indx>
   void get_impl(get_helper<indx>);
-  
+
   template<std::size_t indx>
   void get_impl(get_helper<indx>) const;
 
@@ -161,5 +161,14 @@ auto const& get(tuple<Ts...> const& t)
 template<typename... Ts>
 auto make_tuple(Ts... args)
 { return tuple<Ts...>(args...); }
+
+/* Size of tuple */
+template<typename T>
+class tuple_size
+{ }
+
+template<typename... Ts>
+class tuple_size<tuple<Ts...>> : public integral_constant<std::size_t, sizeof...(Ts)>
+{ }
 
 STL_END
