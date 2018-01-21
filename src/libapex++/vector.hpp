@@ -180,11 +180,14 @@ public:
            / sizeof(T);
   }
 
-  /** Increases the underlying allocation if cap > capacity() */
-  void reserve(size_t cap)
+  /**
+   * Increases the underlying allocation if cap > capacity()
+   * @return nonstandard -- true if re-allocation occurred 
+   */
+  bool reserve(size_t cap)
   {
     if(cap <= capacity())
-      return;
+      return false;
 
     /* New allocation */
     size_t s = size();
@@ -203,6 +206,7 @@ public:
     data_start = new_start;
     data_last = new_last;
     data_end = new_end;
+    return true;
   }
 
   /** @return the number of allocated elements */
@@ -244,19 +248,19 @@ public:
   { clear_helper(*this); }
 
   /** Inserts an element */
-  void insert(iterator const& it, const_reference val)
-  { emplace(it, val); }
+  iterator insert(const_iterator const& it, const_reference val)
+  { return emplace(it, val); }
 
   /** Constructs an element in-place */
   template<typename... Ctor_Args>
-  void emplace(iterator const& it, Ctor_Args... args)
+  void emplace(const_iterator const& it, Ctor_Args... args)
   {
     /* Make a reservation if necessary */
     if(size() == capacity())
       reserve(size() * 2 + 1);
 
     /* Move all elements after `it` back */
-    for(T* ptr = data_last; ptr > it.get_ptr(); --ptr)
+    for(T* ptr = data_last; ptr > it; --ptr)
     {
       T* dst = ptr;
       T* src = ptr - 1;
@@ -269,7 +273,7 @@ public:
     ++data_last;
 
     /* Construct new element */
-    new (it.get_ptr()) T(args...);
+    return new (it) T(args...);
   }
 
   /** Erases a given element */
