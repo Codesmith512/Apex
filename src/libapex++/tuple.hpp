@@ -8,6 +8,7 @@
  * http://en.cppreference.com/w/cpp/utility/tuple
  */
 #include "libstl"
+#include "utility_forward"
 
 STL_BEGIN
 
@@ -165,10 +166,10 @@ auto make_tuple(Ts... args)
 /* Size of tuple */
 template<typename T>
 class tuple_size
-{ }
+{ };
 
 template<typename... Ts>
 class tuple_size<tuple<Ts...>> : public integral_constant<std::size_t, sizeof...(Ts)>
-{ }
+{ };
 
 STL_END

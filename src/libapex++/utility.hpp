@@ -1,8 +1,9 @@
 #pragma once
 
-#include "declval"
+#include "utility_forward"
 #include "libstl"
 #include "type_traits"
+#include "tuple"
 
 /**
  * The definition of the well-documented <utility> file
@@ -13,50 +14,12 @@
 STL_BEGIN
 
 /**
- * Swaps the values of two objects
+ * std::pair implementation
  */
-template<typename T>
-void swap(T& a, T& b)
+template<typename T1, typename T2>
+struct pair : public tuple<T1,T2>
 {
-  T c = a;
-  a = b;
-  b = c;
-}
-
-/**
- * Used to ensure that a reference type is preserved
- */
-namespace detail
-{
-  template<typename T>
-  struct identity
-  { using type = T; };
+  using tuple<T1,T2>::tuple;
 };
-
-template<typename T>
-T&& forward(typename remove_reference<T>::type& ref)
-{ return static_cast<typename detail::identity<T>::type&&>(ref); }
-
-template<typename T>
-T&& forward(typename remove_reference<T>::type&& ref)
-{ return static_cast<typename detail::identity<T>::type&&>(ref); }
-
-/**
- * Creates an xvalue reference
- */
-template<typename T>
-constexpr typename std::remove_reference<T>::type&& move(T&& t)
-{ return static_cast<typename std::remove_reference<T>::type&&>(t); }
-
-/**
- * Replaces the argument with a new value, returning it's previous value
- */
-template<typename T, typename U = T>
-T exchange(T& obj, U&& new_value)
-{
-  T temp = std::move(obj);
-  obj = std::forward<U&&>(new_value);
-  return temp;
-}
 
 STL_END
