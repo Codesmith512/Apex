@@ -64,7 +64,7 @@ public:
    */
   struct attrib_t
   {
-    enum class Color : uint8_t
+    enum class color : uint8_t
     {
       BLACK = 0,
       BLUE,
@@ -85,7 +85,7 @@ public:
     };
 
     /* Constructs an attribute from two colors */
-    attrib_t(Color fg = Color::WHITE, Color bg = Color::BLACK)
+    attrib_t(color fg = color::WHITE, color bg = color::BLACK)
     :val((static_cast<char>(bg) << 4) | static_cast<char>(fg))
     { }
 
@@ -104,6 +104,16 @@ public:
    * @param size    The size of the screen
    */
   vga_screen(coord const& origin, coord const& size);
+
+  /**
+   * Windows with a size.x > 2 and size.y > 2 can have a border!
+   *
+   * @param origin  The upper-left most character
+   * @param size    The size of the screen
+   * @param border_attrib   The attribute to draw the border with
+   * @param border_char     The character to use for the border
+   */
+  vga_screen(coord const& origin, coord const& size, attrib_t border_attrib, char border_char);
 
   /**
    * Writes a c-style string at the cursor
@@ -175,6 +185,11 @@ public:
    */
   attrib_t peek_attrib() const;
 
+  /**
+   * Re-draws every character in the screen with the current attribute
+   */
+  void flush_attrib();
+
 private:
   /* Returns the current vRAM address of the cursor */
   char* cursor_addr();
@@ -182,6 +197,8 @@ private:
   /* Writes a single character */
   void put(char c);
 
+  /* True if this window has a border */
+  bool has_border;
   /* The cursor stack */
   std::vector<coord> cursor_stack;
   /* The attribute stack */

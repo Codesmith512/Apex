@@ -41,6 +41,16 @@ public:
     push_null();
   }
 
+  /* Constructs a string made of c count times */
+  string(size_type count, char c)
+  {
+    reserve(count);
+    push_null();
+
+    while(count--)
+      push_back(c);
+  }
+
   /* Substring constructor */
   string(string const& other, size_type pos, size_type count = npos)
   {
@@ -187,11 +197,9 @@ public:
   /* Inserts count copies of c at index */
   iterator insert(iterator pos, size_type count, char c)
   {
-    while(count)
-    {
+    while(count--)
       pos = data_vec.insert(pos, c) + 1;
-      --count;
-    }
+
     return pos;
   }
 
@@ -214,11 +222,8 @@ public:
   string& erase(size_type index, size_type count = npos)
   {
     count = std::min(count, size() - index);
-    while(count)
-    {
+    while(count--)
       data_vec.erase(data_vec.begin() + index);
-      --count;
-    }
 
     return *this;
   }
@@ -235,14 +240,17 @@ public:
   void pop_back()
   { data_vec.erase(end()); }
 
+  string& append(char c)
+  {
+    push_back(c);
+    return *this;
+  }
+
   /* Appends c count times */
   string& append(size_type count, char c)
   {
-    while(count)
-    {
+    while(count--)
       push_back(c);
-      --count;
-    }
 
     return *this;
   }

@@ -82,17 +82,33 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
  */
 extern "C" int kernel_main()
 {
+  using attrib_t = screen::vga_screen::attrib_t;
+  using color = attrib_t::color;
+
   /* Test the new screen interface */
-  screen::vga_screen screen({0,0}, {80,25});
+  screen::vga_screen screen({0,1}, {80,24}, attrib_t(color::BLACK, color::LIGHT_GRAY), ' ');
+  screen::vga_screen status({0,0}, {80,1});
 
-  int i = 5;
-  std::tuple<char, int, int*> t {'a', i, &i};
+  status.push_attrib({color::LIGHT_GREEN, color::BLACK});
+  status.push_attrib({color::YELLOW, color::BLACK});
 
-  char& c = std::get<0>(t);
-  int& r = std::get<1>(t);
-  int* p = std::get<2>(t);
+  int prog = 0;
+  for(int i = 0; i < 100; ++i)
+  {
+    for(volatile int j = 0; j < 10000000; ++j);
 
-  screen << c + std::to_string(r) + std::to_string(p);
+    screen << std::to_string(i) + "\n";
+
+    int i_prog = (i * 80) / 99;
+    while(i_prog > prog)
+    {
+      ++prog;
+      status << "=";
+    }
+  }
+
+  status.pop_attrib();
+  status.flush_attrib();
 
   return 0;
 }

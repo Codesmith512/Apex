@@ -22,6 +22,42 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size)
 
 }
 
+/* Constructs a windows with a border! */
+vga_screen::vga_screen(coord const& _origin, coord const& _size, attrib_t border_attrib, char border_char)
+  :vga_screen(_origin, _size)
+{
+  /* Verify minimum size for border */
+  if(size.x > 2 && size.y > 2)
+  {
+    push_attrib(border_attrib);
+    push_cursor();
+
+    /* Draw horizontal lines */
+    for(unsigned short x = 0; x < size.x; ++x)
+    {
+      move_cursor(coord(x,0));
+      put(border_char);
+      move_cursor(coord(x,size.y-1));
+      put(border_char);
+    }
+
+    /* Draw vertical lines */
+    for(unsigned short y = 0; y < size.y; ++y)
+    {
+      move_cursor(coord(0,y));
+      put(border_char);
+      move_cursor(coord(size.x-1,y));
+      put(border_char);
+    }
+
+    pop_cursor();
+    pop_attrib();
+
+    origin = origin + coord{1,1};
+    size = size - coord{2,2};
+  }
+}
+
 /* Write a c-style string */
 vga_screen& vga_screen::write(char const* str)
 {
@@ -106,20 +142,20 @@ void vga_screen::pop_attrib()
 vga_screen::attrib_t vga_screen::peek_attrib() const
 { return attrib_stack.back(); }
 
+/* Re-draws everything with the current attribute */
+void vga_screen::flush_attrib()
+{
+  attrib_t attrib = peek_attrib();
+
+  for(unsigned short x = 0; x < size.x; ++x)
+    for(unsigned short y = 0; y < size.y; ++y)
+      coord(x,y).vram_addr()[1] = attrib;
+}
+
 /* Writes a single character at the cursor */
 void vga_screen::put(char c)
 {
   coord& cursor = cursor_stack.back();
-
-  /* Bounds check and correct cursor */
-  if(cursor.x >= size.x)
-  {
-    cursor.x = 2;
-    ++cursor.y;
-  }
-
-  for(; cursor.y >= size.y; --cursor.y)
-    scroll();
 
   /* Print character */
   switch(c)
@@ -131,6 +167,16 @@ void vga_screen::put(char c)
 
   default:
     {
+      /* Bounds check and correct cursor */
+      if(cursor.x >= size.x)
+      {
+        cursor.x = 2;
+        ++cursor.y;
+      }
+
+      for(; cursor.y >= size.y; --cursor.y)
+        scroll();
+
       char* p = (cursor + origin).vram_addr();
       p[0] = c;
       p[1] = peek_attrib();
