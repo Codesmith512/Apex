@@ -352,6 +352,8 @@ private:
 string operator+(string const& lhs, string const& rhs);
 string operator+(string const& lhs, char const* rhs);
 string operator+(char const* lhs, string const& rhs);
+string operator+(string const& lhs, char rhs);
+string operator+(char lhs, string const& rhs);
 
 /* Int conversion to string */
 string to_string(int val);

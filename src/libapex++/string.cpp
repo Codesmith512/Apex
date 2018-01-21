@@ -30,6 +30,23 @@ string operator+(char const* lhs, string const& rhs)
   return s;
 }
 
+/* String concatenation with single character */
+string operator+(string const& lhs, char c)
+{
+  string s = lhs;
+  s.push_back(c);
+  return s;
+}
+
+/* String concatenation with single character */
+string operator+(char c, string const& rhs)
+{
+  string s;
+  s.push_back(c);
+  s += rhs;
+  return s;
+}
+
 /* Int conversion to string */
 string to_string(int val)
 {
@@ -115,12 +132,12 @@ string to_string(void* ptr)
     if(c < 10)
       c += '0';
     else
-      c += 'a';
+      c += 'a' - 10;
 
-    str.insert(static_cast<size_t>(0), c);
+    str.insert(static_cast<size_t>(0), 1, c);
   } while(val);
 
-  return str;
+  return "0x" + str;
 }
 
 STL_END

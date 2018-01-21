@@ -26,30 +26,20 @@ void swap(T& a, T& b)
 /**
  * Used to ensure that a reference type is preserved
  */
+namespace detail
+{
+  template<typename T>
+  struct identity
+  { using type = T; };
+};
 
-/* Forward value as lvalue */
 template<typename T>
-typename enable_if<!is_reference<T>::value, T&>::type
-forward(T& t)
-{ return t; }
+T&& forward(typename remove_reference<T>::type& ref)
+{ return static_cast<typename detail::identity<T>::type&&>(ref); }
 
-/* Forward lvalue as rvalue */
 template<typename T>
-typename enable_if<is_rvalue_reference<T>::value, T&&>::type
-forward(T& t)
-{ return static_cast<T&&>(t); }
-
-/* Forward rvalue as rvalue */
-template<typename T>
-typename enable_if<is_rvalue_reference<T>::value, T&&>::type
-forward(T&& t)
-{ return static_cast<T&&>(t); }
-
-/* Forward lvalue as lvalue */
-template<typename T>
-typename enable_if<is_lvalue_reference<T>::value, T>::type
-forward(T t)
-{ return t; }
+T&& forward(typename remove_reference<T>::type&& ref)
+{ return static_cast<typename detail::identity<T>::type&&>(ref); }
 
 /**
  * Creates an xvalue reference
@@ -65,7 +55,7 @@ template<typename T, typename U = T>
 T exchange(T& obj, U&& new_value)
 {
   T temp = std::move(obj);
-  obj = std::forward<U>(new_value);
+  obj = std::forward<U&&>(new_value);
   return temp;
 }
 

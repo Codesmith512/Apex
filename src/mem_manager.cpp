@@ -37,12 +37,12 @@ public:
   /* Size of a single block */
   static constexpr uint32_t BLOCK_SIZE = alignof(std::min_align_t);
   /* Number of blocks in a page */
-  static constexpr uint32_t BLOCKS_PER_PAGE = PAGE_SIZE / alignof(std::min_align_t);
+  static constexpr uint32_t BLOCKS_PER_PAGE = PAGE_SIZE / BLOCK_SIZE;
 
-  /* Number of elements in the block map */
-  static constexpr uint32_t BLOCK_MAP_SIZE = BLOCKS_PER_PAGE / sizeof(uint32_t);
   /* Number of bits per element in the block map */
   static constexpr uint32_t BLOCK_MAP_BITS = 32;
+  /* Number of elements in the block map */
+  static constexpr uint32_t BLOCK_MAP_SIZE = BLOCKS_PER_PAGE / BLOCK_MAP_BITS;
   
   /* Number of blocks this objects takes up */
   /* Note: cannot use sizeof(...) with constexpr inside class.
@@ -96,7 +96,8 @@ void mem_manager::page_map::init()
     block_map[i] = 0;
 
   /* Reserve blocks for page_map */
-  for(uint32_t i = 0; i < PAGE_MAP_RESERVED_BLOCKS; ++i)
+  uint32_t res = PAGE_MAP_RESERVED_BLOCKS;
+  for(uint32_t i = 0; i < res; ++i)
     alloc_block(i);
 }
 
@@ -115,7 +116,8 @@ void* mem_manager::page_map::malloc(std::size_t size, std::size_t align)
   align = apex::ceil(align, BLOCK_SIZE) / BLOCK_SIZE;
 
   /* Scan blocks for suitable region */
-  for(uint32_t i = PAGE_MAP_RESERVED_BLOCKS+1; i < BLOCKS_PER_PAGE; i += align)
+  uint32_t res = PAGE_MAP_RESERVED_BLOCKS;
+  for(uint32_t i = apex::ceil(res+1, align); i < BLOCKS_PER_PAGE; i += align)
   {
     /* Test size block */
     if(test_block(i-1))
@@ -123,10 +125,10 @@ void* mem_manager::page_map::malloc(std::size_t size, std::size_t align)
 
     /* Number of contiguous blocks */
     uint32_t contig = 0;
-    while(!test_block(i + contig) && contig < size - 1) ++contig;
+    while(contig < size && !test_block(i + contig)) ++contig;
 
     /* Suitable allocation found! */
-    if(contig >= size - 1)
+    if(contig >= size)
     {
       /* Allocate storage blocks */
       for(uint32_t j = 0; j < size; ++j)

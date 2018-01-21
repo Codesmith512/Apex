@@ -9,6 +9,7 @@
 /* STL */
 #include <array>
 #include <std_external>
+#include <tuple>
 #include <vector>
 
 /* APEX */
@@ -82,26 +83,16 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
 extern "C" int kernel_main()
 {
   /* Test the new screen interface */
-  screen::vga_screen info_screen({0,1}, {80,24});
-  screen::vga_screen stat_screen({0,0}, {80,1});
+  screen::vga_screen screen({0,0}, {80,25});
 
-  stat_screen.push_attrib(screen::vga_screen::attrib_t(screen::vga_screen::attrib_t::Color::BLACK,
-                                                       screen::vga_screen::attrib_t::Color::WHITE));
-  stat_screen.scroll();
-  stat_screen.move_cursor({1,0});
-  stat_screen.push_cursor();
-  stat_screen << "status: executing main";
+  int i = 5;
+  std::tuple<char, int, int*> t {'a', i, &i};
 
-  for(unsigned int i = 0; i < 100; ++i)
-  {
-    for(volatile uint32_t s1 = 0; s1 < 10000000; ++s1);
-      
-    info_screen << std::to_string(i) + "\n";
-  }
+  char& c = std::get<0>(t);
+  int& r = std::get<1>(t);
+  int* p = std::get<2>(t);
 
-  stat_screen.scroll();
-  stat_screen.pop_cursor();
-  stat_screen << "status: ???";
+  screen << c + std::to_string(r) + std::to_string(p);
 
   return 0;
 }
