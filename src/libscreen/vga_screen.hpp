@@ -3,6 +3,7 @@
 #include "libscreen"
 
 /* STL */
+#include <string>
 #include <vector>
 
 SCREEN_BEGIN
@@ -107,8 +108,16 @@ public:
   /**
    * Writes a c-style string at the cursor
    */
-  void write(char const* str);
-  vga_screen& operator<<(char const* str);
+  vga_screen& write(char const* str);
+  vga_screen& operator<<(char const* str)
+  { return write(str); }
+
+  /**
+   * Writes a c++ string at the cursor
+   */
+  vga_screen& write(std::string const& str);
+  vga_screen& operator<<(std::string const& str)
+  { return write(str); }
 
   /**
    * Scrolls the display one line

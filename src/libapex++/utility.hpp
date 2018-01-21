@@ -51,11 +51,6 @@ typename enable_if<is_lvalue_reference<T>::value, T>::type
 forward(T t)
 { return t; }
 
-/* Do not forward rvalues as lvalues */
-template<typename T>
-typename enable_if<is_lvalue_reference<T>::value, T>::type
-forward(T&& t) = delete;
-
 /**
  * Creates an xvalue reference
  */

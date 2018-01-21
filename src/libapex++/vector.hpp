@@ -155,13 +155,15 @@ public:
    */
   iterator begin()
   { return iterator(data_start); }
-
+  const_iterator begin() const
+  { return const_iterator(data_start); }
   const_iterator cbegin() const
   { return const_iterator(data_start); }
 
   iterator end()
   { return iterator(data_last); }
-
+  const_iterator end() const
+  { return const_iterator(data_last); }
   const_iterator cend() const
   { return const_iterator(data_last); }
 
@@ -222,7 +224,7 @@ public:
   {
     /* New allocation */
     size_t s = size();
-    T* new_start = std::malloc(sizeof(T) * s);
+    T* new_start = reinterpret_cast<T*>(std::malloc(sizeof(T) * s));
     T* new_last = new_start + s;
     T* new_end = new_last;
 
@@ -248,16 +250,20 @@ public:
   { clear_helper(*this); }
 
   /** Inserts an element */
-  iterator insert(const_iterator const& it, const_reference val)
+  iterator insert(const_iterator it, const_reference val)
   { return emplace(it, val); }
 
   /** Constructs an element in-place */
   template<typename... Ctor_Args>
-  void emplace(const_iterator const& it, Ctor_Args... args)
+  iterator emplace(const_iterator it, Ctor_Args... args)
   {
     /* Make a reservation if necessary */
     if(size() == capacity())
+    {
+      difference_type d = it - begin();
       reserve(size() * 2 + 1);
+      it = begin() + d;
+    }
 
     /* Move all elements after `it` back */
     for(T* ptr = data_last; ptr > it; --ptr)
@@ -273,12 +279,14 @@ public:
     ++data_last;
 
     /* Construct new element */
-    return new (it) T(args...);
+    return new (const_cast<iterator>(it)) T(args...);
   }
 
   /** Erases a given element */
-  void erase(iterator const& it)
+  iterator erase(iterator it)
   {
+    difference_type indx = it - begin();
+
     /* Destroy given element */
     destroy(*it);
 
@@ -294,6 +302,23 @@ public:
 
     /* One less element */
     --data_last;
+
+    return begin() + indx;
+  }
+
+  /** Erases the range of elements [start,end) */
+  iterator erase(iterator start, iterator end)
+  {
+    difference_type indx = start - begin();
+    difference_type count = end - start;
+
+    while(count)
+    {
+      erase(begin() + indx);
+      --count;
+    }
+
+    return begin() + indx;
   }
 
   /** Pushes the given element back */

@@ -23,10 +23,21 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size)
 }
 
 /* Write a c-style string */
-void vga_screen::write(char const* str)
+vga_screen& vga_screen::write(char const* str)
 {
   for(; *str; ++str)
     put(*str);
+
+  return *this;
+}
+
+/* Write a c++ style string */
+vga_screen& vga_screen::write(std::string const& str)
+{
+  for(char c : str)
+    put(c);
+
+  return *this;
 }
 
 /* Scroll the display */
@@ -49,13 +60,6 @@ void vga_screen::scroll()
     dst[0] = ' ';
     dst[1] = peek_attrib();
   }
-}
-
-/* Stream operator */
-vga_screen& vga_screen::operator<<(char const* str)
-{
-  write(str);
-  return *this;
 }
 
 /* Moves the current cursor */

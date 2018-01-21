@@ -95,11 +95,8 @@ extern "C" int kernel_main()
   for(unsigned int i = 0; i < 100; ++i)
   {
     for(volatile uint32_t s1 = 0; s1 < 10000000; ++s1);
-
-    apex::stack_string s;
-    s += i;
-    s += "\n";
-    info_screen << s.c_str();
+      
+    info_screen << std::to_string(i) + "\n";
   }
 
   stat_screen.scroll();
