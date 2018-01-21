@@ -58,7 +58,7 @@ public:
   }
 
   /** Size+Value Initialization */
-  vector(size_t count, T const& value = T())
+  vector(size_t count, const_reference value = T())
   :vector()
   {
     resize(count, value);
@@ -87,7 +87,7 @@ public:
   :vector()
   {
     reserve(init.size());
-    for(T const& t : init)
+    for(const_reference t : init)
       push_back(t);
   }
 
@@ -105,7 +105,7 @@ public:
    */
 
   /** @return the specified element (with bounds checking) */
-  T& at(size_t pos)
+  reference at(size_t pos)
   {
     T* elem = data_start + pos;
     if(elem >= data_last)
@@ -113,7 +113,7 @@ public:
     return data_start[pos];
   }
 
-  T const& at(size_t pos) const
+  const_reference at(size_t pos) const
   {
     T* elem = data_start + pos;
     if(elem >= data_last)
@@ -122,24 +122,24 @@ public:
   }
 
   /** @return the specified element */
-  T& operator[](size_t pos)
+  reference operator[](size_t pos)
   { return data_start[pos]; }
 
-  T const& operator[](size_t pos) const
+  const_reference operator[](size_t pos) const
   { return data_start[pos]; }
 
   /** @return the first element */
-  T& front()
+  reference front()
   { return at(0); }
 
-  T const& front() const
+  const_reference front() const
   { return at(0); }
 
   /** @return the last element */
-  T& back()
+  reference back()
   { return at(size() - 1); }
 
-  T const& back() const
+  const_reference back() const
   { return at(size() - 1); }
 
   /** @return the start of the allocated array */
@@ -244,7 +244,7 @@ public:
   { clear_helper(*this); }
 
   /** Inserts an element */
-  void insert(iterator const& it, T const& val)
+  void insert(iterator const& it, const_reference val)
   { emplace(it, val); }
 
   /** Constructs an element in-place */
@@ -293,7 +293,7 @@ public:
   }
 
   /** Pushes the given element back */
-  void push_back(T const& val)
+  void push_back(const_reference val)
   { emplace_back(val); }
 
   /** Constructs a new element on the back */
@@ -313,7 +313,7 @@ public:
   { pop_back_helper(*this); }
 
   /** Resize the vector */
-  void resize(size_t new_size, T const& value = T())
+  void resize(size_t new_size, const_reference value = T())
   {
     /* Increase capacity if necessary */
     if(new_size > capacity())
