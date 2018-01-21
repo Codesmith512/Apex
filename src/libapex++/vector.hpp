@@ -31,7 +31,7 @@ public:
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
   using reference = T&;
-  using const_reference = const T&;
+  using const_reference = T const&;
   using pointer = T*;
   using const_pointer = const T*;
   using iterator = pointer;
@@ -58,14 +58,14 @@ public:
   }
 
   /** Size+Value Initialization */
-  vector(size_t count, const T& value = T())
+  vector(size_t count, T const& value = T())
   :vector()
   {
     resize(count, value);
   }
 
   /** Copy Constructor */
-  vector(const vector<T>& other)
+  vector(vector<T> const& other)
   {
     size_t elements = other.size();
     reserve(other.capacity());
@@ -74,7 +74,7 @@ public:
   }
 
   /** Move constructor */
-  vector(const vector<T>&& other)
+  vector(vector<T> const&& other)
   :data_start(exchange(other.data_start, 0))
   ,data_last(exchange(other.data_last, 0))
   ,data_end(exchange(other.data_end, 0))
@@ -87,7 +87,7 @@ public:
   :vector()
   {
     reserve(init.size());
-    for(const T& t : init)
+    for(T const& t : init)
       push_back(t);
   }
 
@@ -112,7 +112,7 @@ public:
     return data_start[pos];
   }
 
-  const T& at(size_t pos) const
+  T const& at(size_t pos) const
   {
     T* elem = data_start + pos;
     if(elem >= data_last)
@@ -124,21 +124,21 @@ public:
   T& operator[](size_t pos)
   { return data_start[pos]; }
 
-  const T& operator[](size_t pos) const
+  T const& operator[](size_t pos) const
   { return data_start[pos]; }
 
   /** @return the first element */
   T& front()
   { return at(0); }
 
-  const T& front() const
+  T const& front() const
   { return at(0); }
 
   /** @return the last element */
   T& back()
   { return at(size() - 1); }
 
-  const T& back() const
+  T const& back() const
   { return at(size() - 1); }
 
   /** @return the start of the allocated array */
@@ -243,12 +243,12 @@ public:
   { clear_helper(*this); }
 
   /** Inserts an element */
-  void insert(const iterator& it, const T& val)
+  void insert(iterator const& it, T const& val)
   { emplace(it, val); }
 
   /** Constructs an element in-place */
   template<typename... Ctor_Args>
-  void emplace(const iterator& it, Ctor_Args... args)
+  void emplace(iterator const& it, Ctor_Args... args)
   {
     /* Make a reservation if necessary */
     if(size() == capacity())
@@ -272,7 +272,7 @@ public:
   }
 
   /** Erases a given element */
-  void erase(const iterator& it)
+  void erase(iterator const& it)
   {
     /* Destroy given element */
     destroy(*it);
@@ -292,7 +292,7 @@ public:
   }
 
   /** Pushes the given element back */
-  void push_back(const T& val)
+  void push_back(T const& val)
   { emplace_back(val); }
 
   /** Constructs a new element on the back */
@@ -312,7 +312,7 @@ public:
   { pop_back_helper(*this); }
 
   /** Resize the vector */
-  void resize(size_t new_size, const T& value = T())
+  void resize(size_t new_size, T const& value = T())
   {
     /* Increase capacity if necessary */
     if(new_size > capacity())
@@ -378,7 +378,7 @@ private:
  */
 
 template<typename T, typename U>
-bool operator==(const vector<T>& lhs, const vector<U>& rhs)
+bool operator==(vector<T> const& lhs, vector<U> const& rhs)
 {
   size_t s = lhs.size();
   if(rhs.size() != s)
@@ -392,11 +392,11 @@ bool operator==(const vector<T>& lhs, const vector<U>& rhs)
 }
 
 template<typename T, typename U>
-bool operator!=(const vector<T>& lhs, const vector<U>& rhs)
+bool operator!=(vector<T> const& lhs, vector<U> const& rhs)
 { return !(lhs == rhs); }
 
 template<typename T, typename U>
-bool operator<(const vector<T>& lhs, const vector<U>& rhs)
+bool operator<(vector<T> const& lhs, vector<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -409,7 +409,7 @@ bool operator<(const vector<T>& lhs, const vector<U>& rhs)
 }
 
 template<typename T, typename U>
-bool operator<=(const vector<T>& lhs, const vector<U>& rhs)
+bool operator<=(vector<T> const& lhs, vector<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -422,7 +422,7 @@ bool operator<=(const vector<T>& lhs, const vector<U>& rhs)
 }
 
 template<typename T, typename U>
-bool operator>(const vector<T>& lhs, const vector<U>& rhs)
+bool operator>(vector<T> const& lhs, vector<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -435,7 +435,7 @@ bool operator>(const vector<T>& lhs, const vector<U>& rhs)
 }
 
 template<typename T, typename U>
-bool operator>=(const vector<T>& lhs, const vector<U>& rhs)
+bool operator>=(vector<T> const& lhs, vector<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
