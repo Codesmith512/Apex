@@ -97,6 +97,7 @@ public:
   ~vector()
   {
     clear();
+    std::free(data_start);
   }
 
   /*
