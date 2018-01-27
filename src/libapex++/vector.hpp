@@ -415,7 +415,7 @@ bool operator==(vector<T> const& lhs, vector<U> const& rhs)
     return false;
 
   for(size_t i = 0; i < s; ++i)
-    if(lhs[i] < rhs[i] || rhs[i] < lhs[i])
+    if(!lexi::equal(lhs[i], rhs[i]))
       return false;
 
   return true;
@@ -432,8 +432,8 @@ bool operator<(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] < rhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::less_than(lhs[i], rhs[i]);
 
   return lhs_s < rhs_s;
 }
@@ -445,8 +445,8 @@ bool operator<=(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(rhs[i] < lhs[i])
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::less_or_equal(lhs[i], rhs[i]);
 
   return lhs_s <= rhs_s;
 }
@@ -458,8 +458,8 @@ bool operator>(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if((lhs[i] < rhs[i]) || !(rhs[i] < lhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::greater_than(lhs[i], rhs[i]);
 
   return lhs_s > rhs_s;
 }
@@ -471,8 +471,8 @@ bool operator>=(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(rhs[i] < lhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::greater_or_equal(lhs[i], rhs[i]);
 
   return lhs_s >= rhs_s;
 }
