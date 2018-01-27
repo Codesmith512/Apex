@@ -85,17 +85,16 @@ extern "C" int kernel_main()
   /* Test the new screen interface */
   using namespace screen;
 
-  vga_manager manager;
-  vga_screen& counter = manager.create_screen({0,1}, {40,24}, "Counter");
-  vga_screen& other = manager.create_screen({40,1}, {40,24}, "Unused");
-  vga_screen& status = manager.create_screen({0,0}, {80,1}, "Status");
-  manager.set_active(&counter);
+  vga_manager manager({80,25});
+  manager.enable_passive_update();
 
+  vga_screen& counter = manager.create_screen({0,1}, {40,24}, "Counter");
   counter.push_attrib({color::LIGHT_GRAY, color::BLACK});
 
-  status.push_attrib({color::LIGHT_GREEN, color::BLACK});
-  status.push_attrib({color::YELLOW, color::BLACK});
-
+  vga_screen& prog_s = manager.create_screen({20,10}, {40,3}, "Progress");
+  prog_s.push_attrib({color::LIGHT_GREEN, color::BLACK});
+  prog_s.push_attrib({color::YELLOW, color::BLACK});
+  manager.set_active(prog_s);
 
   int prog = 0;
   for(int i = 0; i < 100; ++i)
@@ -104,16 +103,19 @@ extern "C" int kernel_main()
 
     counter << std::to_string(i) + "\n";
 
-    int i_prog = (i * 80) / 99;
+    int i_prog = (i * 38) / 99;
     while(i_prog > prog)
     {
       ++prog;
-      status << "=";
+      prog_s << "=";
     }
+
+    if(i == 50)
+      manager.create_screen({40,1}, {40,24}, "Ghost");
   }
 
-  status.pop_attrib();
-  status.flush_attrib();
+  prog_s.pop_attrib();
+  prog_s.flush_attrib();
 
   manager.set_active();
 

@@ -24,8 +24,6 @@ struct coord
   :coord(o.x, o.y)
   { }
 
-  char* vram_addr() const;
-
   coord operator+(coord const& o) const
   { return coord(x + o.x, y + o.y); }
   void operator+=(coord const& o)
@@ -95,6 +93,10 @@ struct attrib_t
  * - The cursor is a marker for the next write operation
  * - The topmost entry on the cursor stack defines the currently used cursor
  *
+ * Only the active screen, and screens with passive, will update VRAM on write
+ * All screens update the framebuffer on write
+ * On becoming active, a screen draws it's entire framebuffer to the screen.
+ *
  * Attribute
  * - An attribute defines a color setting
  * - The topmost entry on the attribute stack defines the currently used attribute
@@ -157,6 +159,11 @@ public:
   void flush_attrib();
 
   /**
+   * Re-draws every character on the screen with ones saved in the framebuffer
+   */
+  void flush();
+
+  /**
    * Sets the screen to active/inactive, updating the border if necessary
    */
   void set_active(bool _active = true);
@@ -199,12 +206,15 @@ public:
 
 
 private:
+  /* Converts an absolute coordinate into the VRAM address */
+  char* vram_addr(coord const& c);
+
   /* Writes a single character, using the cursor_stack */
   void put(char c);
 
   /* True if this window has a border */
   bool has_border;
-  /* True if this window is active */
+  /* Update booleans */
   bool active;
   /* Screen geometry */
   coord origin, size;
@@ -216,6 +226,11 @@ private:
   std::vector<coord> cursor_stack;
   /* The attribute stack */
   std::vector<attrib_t> attrib_stack;
+
+  /* The stored framebuffer */
+  struct vga_entry
+  { char c; attrib_t a; };
+  std::vector<std::vector<vga_entry>> framebuffer;
 };
 
 /**
@@ -227,14 +242,23 @@ class vga_manager
 {
 public:
 
-  /** Default constructor -- active border is WHITE on BLACK and inactive is DARK_GRAY on BLACK */
-  vga_manager();
+  /**
+   * Constructor
+   * 
+   * active border defaults to white on black
+   * inactive border defaults to dark gray on black
+   *
+   * @param hw_size    The size of the hardware screen
+   */
+  vga_manager(coord const& hw_size);
 
   /* Destructor */
   ~vga_manager();
 
   /**
-   * @param screen  The screen to set active, nullptr for none
+   * Sets a new active screen -- this screen is raised to be on top of everyone else
+   *
+   * @param screen  The screen to set active, nullptr for none.
    */
   void set_active(vga_screen* screen);
   void set_active(vga_screen& screen)
@@ -264,14 +288,44 @@ public:
   void set_inactive_border(attrib_t border);
 
   /**
+   * Updates every screen
+   */
+  void update_all();
+
+  /**
+   * Updates every screen, if passive updates are enabled
+   */
+  void passive_update_all();
+
+  /**
    * Trivial accessors
    */
+  bool has_passive_update() const
+    { return passive_update; }
   attrib_t get_active_border() const
     { return active_border; }
   attrib_t get_inactive_border() const
     { return inactive_border; }
+  unsigned short get_width() const
+    { return size.x; }
+  unsigned short get_height() const
+    { return size.y; }
+
+  /**
+   * Trivial mutators
+   */
+  void enable_passive_update(bool enable = true)
+    { passive_update = enable; }
+  void disable_passive_update()
+    { passive_update = false; }
 
 private:
+  /* The passive update flag */
+  bool passive_update;
+
+  /* The size of the entire screen */
+  coord size;
+
   /* The active and inactive border attributes */
   attrib_t active_border, inactive_border;
 

@@ -1,16 +1,6 @@
 #include "vga_screen"
 
-#define HW_WIDTH 80
-#define HW_HEIGHT 25
-
 SCREEN_BEGIN
-
-/* Helper function -- converts a coordinate to it's vRAM address */
-char* coord::vram_addr() const
-{
-  return reinterpret_cast<char*>(0xb8000) +
-         (((y * HW_WIDTH) + x) * 2);
-}
 
 /**
  * vga_screen definition
@@ -25,18 +15,16 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size, std::string con
   ,manager(_manager)
   ,title(_title)
   ,cursor_stack({{0,0}})
-  ,attrib_stack({attrib_t()})
+  ,attrib_stack({color::LIGHT_GRAY, color::BLACK})
+  ,framebuffer(size.y, std::vector<vga_entry>(size.x, {' ', {color::LIGHT_GRAY, color::BLACK}}))
 {
   /* Validate size */
-  if(size.x > 3 && size.y > 3)
+  if(size.x > 2 && size.y > 2)
   {
-    origin = origin + coord{1,1};
-    size = size - coord{2,2};
+    origin += coord{1,1};
+    size -= coord{2,2};
     has_border = true;
   }
-
-  /* Draw border */
-  update_border();
 }
 
 /* Write a c-style string */
@@ -45,17 +33,14 @@ vga_screen& vga_screen::write(char const* str)
   for(; *str; ++str)
     put(*str);
 
+  manager->passive_update_all();
+
   return *this;
 }
 
 /* Write a c++ style string */
 vga_screen& vga_screen::write(std::string const& str)
-{
-  for(char c : str)
-    put(c);
-
-  return *this;
-}
+{ return write(str.c_str()); }
 
 /* Re-draw the border */
 void vga_screen::update_border()
@@ -70,10 +55,10 @@ void vga_screen::update_border()
                            : manager->get_inactive_border();
 
   /* Helper function to plot a single character on the border */
-  auto put = [&border_origin, &attrib](char c, unsigned short x, unsigned short y)
+  auto put = [this, &border_origin, &attrib](char c, unsigned short x, unsigned short y)
   {
-    (border_origin + coord{x,y}).vram_addr()[0] = c;
-    (border_origin + coord{x,y}).vram_addr()[1] = attrib;
+    vram_addr(border_origin + coord{x,y})[0] = c;
+    vram_addr(border_origin + coord{x,y})[1] = attrib;
   };
 
   /*
@@ -143,22 +128,29 @@ void vga_screen::update_border()
 /* Scroll the display */
 void vga_screen::scroll()
 {
-  /* Memcpy line up */
-  for(unsigned short y = 1; y < size.y; ++y)
+  /* Update framebuffer */
+  framebuffer.erase(framebuffer.begin());
+  framebuffer.emplace_back(size.x, vga_entry{' ', peek_attrib()});
+
+  if(is_active())
+  {
+    /* Memcpy line up */
+    for(unsigned short y = 1; y < size.y; ++y)
+      for(unsigned short x = 0; x < size.x; ++x)
+      {
+        char* src = vram_addr(coord(x,y) + origin);
+        char* dst = vram_addr(coord(x,y-1) + origin);
+        dst[0] = src[0];
+        dst[1] = src[1];
+      }
+
+    /* Clear lowest line in the screen */
     for(unsigned short x = 0; x < size.x; ++x)
     {
-      char* src = (coord(x,y) + origin).vram_addr();
-      char* dst = (coord(x,y-1) + origin).vram_addr();
-      dst[0] = src[0];
-      dst[1] = src[1];
+      char* dst = vram_addr(coord(x,size.y-1) + origin);
+      dst[0] = ' ';
+      dst[1] = peek_attrib();
     }
-
-  /* Clear lowest line in the screen */
-  for(unsigned short x = 0; x < size.x; ++x)
-  {
-    char* dst = (coord(x,size.y-1) + origin).vram_addr();
-    dst[0] = ' ';
-    dst[1] = peek_attrib();
   }
 }
 
@@ -175,7 +167,7 @@ void vga_screen::pop_attrib()
 {
   attrib_stack.pop_back();
   if(attrib_stack.empty())
-    attrib_stack.push_back(attrib_t());
+    attrib_stack.push_back({color::LIGHT_GRAY, color::BLACK});
 }
 
 /* Re-draws everything with the current attribute */
@@ -183,9 +175,29 @@ void vga_screen::flush_attrib()
 {
   attrib_t attrib = peek_attrib();
 
+  for(std::vector<vga_entry>& entries : framebuffer)
+    for(vga_entry& e : entries)
+      e.a = attrib;
+
+  if(is_active())
+    for(unsigned short x = 0; x < size.x; ++x)
+      for(unsigned short y = 0; y < size.y; ++y)
+        vram_addr({x,y})[1] = attrib;
+
+  manager->passive_update_all();
+}
+
+/* Re-draws everything on the screen */
+void vga_screen::flush()
+{
+  update_border();
+
   for(unsigned short x = 0; x < size.x; ++x)
     for(unsigned short y = 0; y < size.y; ++y)
-      coord(x,y).vram_addr()[1] = attrib;
+    {
+      vram_addr(origin + coord{x,y})[0] = framebuffer[y][x].c;
+      vram_addr(origin + coord{x,y})[1] = framebuffer[y][x].a;
+    }
 }
 
 /* Updates the active status */
@@ -195,7 +207,15 @@ void vga_screen::set_active(bool _active)
     return;
 
   active = _active;
-  update_border();
+  if(active)
+    flush();
+}
+
+/* VRAM from coordinate */
+char* vga_screen::vram_addr(coord const& c)
+{
+  return reinterpret_cast<char*>(0xb8000) + 
+         (((c.y * manager->get_width()) + c.x) * 2);
 }
 
 /* Writes a single character at the cursor */
@@ -223,9 +243,15 @@ void vga_screen::put(char c)
       for(; cursor.y >= size.y; --cursor.y)
         scroll();
 
-      char* p = (cursor + origin).vram_addr();
-      p[0] = c;
-      p[1] = peek_attrib();
+      framebuffer[cursor.y][cursor.x] = {c, peek_attrib()};
+
+      if(is_active())
+      {
+        char* p = vram_addr(cursor + origin);
+        p[0] = c;
+        p[1] = peek_attrib();
+      }
+
       ++cursor.x;
     }
   }
@@ -236,11 +262,18 @@ void vga_screen::put(char c)
  */
 
 /* Default constructor */
-vga_manager::vga_manager()
-:active_border(color::WHITE, color::BLACK)
+vga_manager::vga_manager(coord const& hw_size)
+:size(hw_size)
+,active_border(color::WHITE, color::BLACK)
 ,inactive_border(color::DARK_GRAY, color::BLACK)
 {
-
+  /* Clear screen */
+  for(unsigned short x = 0; x < size.x; ++x)
+    for(unsigned short y = 0; y < size.y; ++y)
+    {
+      char* p = reinterpret_cast<char*>(0xb8000) + (((y * size.x) + x) * 2);
+      p[0] = ' ';
+    }
 }
 
 /* Destructor */
@@ -253,15 +286,27 @@ vga_manager::~vga_manager()
 /* Sets the active screen */
 void vga_manager::set_active(vga_screen* screen)
 {
-  for(vga_screen* s : screens)
-    s->set_active(s == screen);
+  for(auto it = screens.begin();
+      it != screens.end();)
+  {
+    if(*it == screen)
+      it = screens.erase(it);
+    else
+      (*it++)->set_inactive();
+  }
+
+  if(screen)
+  {
+    screens.push_back(screen);
+    screen->set_active();
+  }
 }
 
 /* Creates a new screen */
 vga_screen& vga_manager::create_screen(coord const& origin, coord const& size, std::string const& title)
 {
-  screens.push_back(new vga_screen(origin, size, title, this));
-  return *screens.back();
+  screens.insert(screens.begin(), new vga_screen(origin, size, title, this));
+  return *screens.front();
 }
 
 /* Update active border color */
@@ -282,5 +327,18 @@ void vga_manager::set_inactive_border(attrib_t border)
       screen->update_border();
 }
 
+/* Updates every screen */
+void vga_manager::update_all()
+{
+  for(vga_screen* screen : screens)
+    screen->flush();
+}
+
+/* Calls update_all if passive_update is set */
+void vga_manager::passive_update_all()
+{
+  if(passive_update)
+    update_all();
+}
 
 SCREEN_END

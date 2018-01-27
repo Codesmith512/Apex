@@ -50,13 +50,6 @@ public:
 
   }
 
-  /** Size initialization */
-  vector(size_t count)
-  :vector()
-  {
-    resize(count);
-  }
-
   /** Size+Value Initialization */
   vector(size_t count, const_reference value = T())
   :vector()
@@ -66,6 +59,7 @@ public:
 
   /** Copy Constructor */
   vector(vector<T> const& other)
+  :vector()
   {
     size_t elements = other.size();
     reserve(other.capacity());
@@ -74,10 +68,10 @@ public:
   }
 
   /** Move constructor */
-  vector(vector<T> const&& other)
-  :data_start(exchange(other.data_start, 0))
-  ,data_last(exchange(other.data_last, 0))
-  ,data_end(exchange(other.data_end, 0))
+  vector(vector<T>&& other)
+  :data_start(exchange(other.data_start, nullptr))
+  ,data_last(exchange(other.data_last, nullptr))
+  ,data_end(exchange(other.data_end, nullptr))
   {
 
   }
@@ -98,6 +92,22 @@ public:
   {
     clear();
     std::free(data_start);
+  }
+
+  /** Copy Assignment */
+  vector<T>& operator=(vector<T>& other)
+  {
+    this->~vector();
+    new (this) vector<T>(other);
+    return *this;
+  }
+
+  /** Move assignment */
+  vector<T>& operator=(vector<T>&& other)
+  {
+    this->~vector();
+    new (this) vector<T>(other);
+    return *this;
   }
 
   /*
@@ -291,10 +301,10 @@ public:
     destroy(*it);
 
     /* Shift all elements forward */
-    for(T* ptr = it; ptr < data_last; ++ptr)
+    for(T* ptr = it+1; ptr < data_last; ++ptr)
     {
-      T* dst = ptr;
-      T* src = ptr + 1;
+      T* dst = ptr - 1;
+      T* src = ptr;
 
       new (dst) T(std::move(*src));
       destroy(*src);
