@@ -3,6 +3,7 @@
 *.ao_d
 *.co
 *.co_d
+*.crto
 *.bin
 *.elf
 *.errlog
