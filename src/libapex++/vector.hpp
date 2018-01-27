@@ -415,7 +415,7 @@ bool operator==(vector<T> const& lhs, vector<U> const& rhs)
     return false;
 
   for(size_t i = 0; i < s; ++i)
-    if(!(lhs[i] == rhs[i]))
+    if(lhs[i] < rhs[i] || rhs[i] < lhs[i])
       return false;
 
   return true;
@@ -445,7 +445,7 @@ bool operator<=(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] <= rhs[i]))
+    if(rhs[i] < lhs[i])
       return false;
 
   return lhs_s <= rhs_s;
@@ -458,7 +458,7 @@ bool operator>(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] > rhs[i]))
+    if((lhs[i] < rhs[i]) || !(rhs[i] < lhs[i]))
       return false;
 
   return lhs_s > rhs_s;
@@ -471,7 +471,7 @@ bool operator>=(vector<T> const& lhs, vector<U> const& rhs)
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] >= rhs[i]))
+    if(!(rhs[i] < lhs[i]))
       return false;
 
   return lhs_s >= rhs_s;
