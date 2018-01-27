@@ -135,72 +135,72 @@ struct array
  * Lexicographic comparisons
  */
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator==(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator==(array<T> const& lhs, array<U> const& rhs)
 {
   size_t s = lhs.size();
   if(rhs.size() != s)
     return false;
 
   for(size_t i = 0; i < s; ++i)
-    if(!(lhs[i] == rhs[i]))
+    if(!lexi::equal(lhs[i], rhs[i]))
       return false;
 
   return true;
 }
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator!=(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator!=(array<T> const& lhs, array<U> const& rhs)
 { return !(lhs == rhs); }
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator<(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator<(array<T> const& lhs, array<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] < rhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::less_than(lhs[i], rhs[i]);
 
   return lhs_s < rhs_s;
 }
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator<=(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator<=(array<T> const& lhs, array<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] <= rhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::less_or_equal(lhs[i], rhs[i]);
 
   return lhs_s <= rhs_s;
 }
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator>(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator>(array<T> const& lhs, array<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] > rhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::greater_than(lhs[i], rhs[i]);
 
   return lhs_s > rhs_s;
 }
 
-template<typename T, std::size_t Ts, typename U, std::size_t Us>
-bool operator>=(const array<T, Ts>& lhs, const array<U, Us>& rhs)
+template<typename T, typename U>
+bool operator>=(array<T> const& lhs, array<U> const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
 
   for(size_t i = 0; i < min(lhs_s, rhs_s); ++i)
-    if(!(lhs[i] >= rhs[i]))
-      return false;
+    if(!lexi::equal(lhs[i], rhs[i]))
+      return lexi::greater_or_equal(lhs[i], rhs[i]);
 
   return lhs_s >= rhs_s;
 }
