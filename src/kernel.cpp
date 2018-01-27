@@ -86,8 +86,10 @@ extern "C" int kernel_main()
   using color = attrib_t::color;
 
   /* Test the new screen interface */
-  screen::vga_screen screen({0,1}, {80,24}, attrib_t(color::BLACK, color::LIGHT_GRAY), ' ');
+  screen::vga_screen screen({0,1}, {80,24}, attrib_t(color::WHITE, color::BLACK), "Counter");
   screen::vga_screen status({0,0}, {80,1});
+
+  screen.push_attrib({color::LIGHT_GRAY, color::BLACK});
 
   status.push_attrib({color::LIGHT_GREEN, color::BLACK});
   status.push_attrib({color::YELLOW, color::BLACK});

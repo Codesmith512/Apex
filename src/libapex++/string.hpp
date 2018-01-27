@@ -97,12 +97,19 @@ public:
 
   /* Assignment operators for any of the above constructors */
   template<typename T>
-  string& operator=(T other)
+  string& assign(T other)
   {
     this->~string();
     new (this) string(other);
     return *this;
   }
+
+  string& operator=(char const* other)
+  { return assign(other); }
+  string& operator=(string const& other)
+  { return assign(other); }
+  string& operator=(string&& other)
+  { return assign(other); }
 
   /**
    * Element access

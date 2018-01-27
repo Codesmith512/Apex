@@ -108,12 +108,14 @@ public:
   /**
    * Windows with a size.x > 2 and size.y > 2 can have a border!
    *
+   * Additionally, the title must be less than size.x-2
+   *
    * @param origin  The upper-left most character
    * @param size    The size of the screen
    * @param border_attrib   The attribute to draw the border with
    * @param border_char     The character to use for the border
    */
-  vga_screen(coord const& origin, coord const& size, attrib_t border_attrib, char border_char);
+  vga_screen(coord const& origin, coord const& size, attrib_t border_attrib, std::string const& title);
 
   /**
    * Writes a c-style string at the cursor
@@ -128,6 +130,11 @@ public:
   vga_screen& write(std::string const& str);
   vga_screen& operator<<(std::string const& str)
   { return write(str); }
+
+  /**
+   * Re-draws the border with the given attribute
+   */
+  void update_border(attrib_t border_attrib);
 
   /**
    * Scrolls the display one line
@@ -190,21 +197,30 @@ public:
    */
   void flush_attrib();
 
-private:
-  /* Returns the current vRAM address of the cursor */
-  char* cursor_addr();
+  /**
+   * @param title   The new title of the window
+   */
+  void set_title(std::string const& title);
 
-  /* Writes a single character */
+  /**
+   * @return        The current title of the window
+   */
+  std::string const& get_title() const;
+
+private:
+  /* Writes a single character, using the cursor_stack */
   void put(char c);
 
   /* True if this window has a border */
   bool has_border;
+  /* Screen geometry */
+  coord origin, size;
+  /* The title of the window */
+  std::string title;
   /* The cursor stack */
   std::vector<coord> cursor_stack;
   /* The attribute stack */
   std::vector<attrib_t> attrib_stack;
-  /* Screen geometry */
-  coord origin, size;
 };
 
 SCREEN_END

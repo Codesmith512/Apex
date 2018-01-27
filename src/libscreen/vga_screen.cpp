@@ -14,48 +14,35 @@ char* vga_screen::coord::vram_addr() const
 
 /* Construction from Geometry */
 vga_screen::vga_screen(coord const& _origin, coord const& _size)
-  :cursor_stack({{0,0}})
-  ,attrib_stack({attrib_t()})
+  :has_border(false)
   ,origin(_origin)
   ,size(_size)
+  ,cursor_stack({{0,0}})
+  ,attrib_stack({attrib_t()})
 {
 
 }
 
 /* Constructs a windows with a border! */
-vga_screen::vga_screen(coord const& _origin, coord const& _size, attrib_t border_attrib, char border_char)
+vga_screen::vga_screen(coord const& _origin, coord const& _size, attrib_t border_attrib, std::string const& _title)
   :vga_screen(_origin, _size)
 {
-  /* Verify minimum size for border */
+  /* Validate size */
   if(size.x > 2 && size.y > 2)
   {
-    push_attrib(border_attrib);
-    push_cursor();
-
-    /* Draw horizontal lines */
-    for(unsigned short x = 0; x < size.x; ++x)
-    {
-      move_cursor(coord(x,0));
-      put(border_char);
-      move_cursor(coord(x,size.y-1));
-      put(border_char);
-    }
-
-    /* Draw vertical lines */
-    for(unsigned short y = 0; y < size.y; ++y)
-    {
-      move_cursor(coord(0,y));
-      put(border_char);
-      move_cursor(coord(size.x-1,y));
-      put(border_char);
-    }
-
-    pop_cursor();
-    pop_attrib();
-
     origin = origin + coord{1,1};
     size = size - coord{2,2};
+    has_border = true;
   }
+  else
+    return;
+
+  /* Validate Name */
+  if(_title.size() < size.x)
+    title = _title;
+
+  /* Draw border with attribute */
+  update_border(border_attrib);
 }
 
 /* Write a c-style string */
@@ -74,6 +61,54 @@ vga_screen& vga_screen::write(std::string const& str)
     put(c);
 
   return *this;
+}
+
+/* Re-draw the border */
+void vga_screen::update_border(vga_screen::attrib_t attrib)
+{
+  /* The border's origin */
+  coord border_origin = origin - coord{1,1};
+
+  /* Helper function to plot a single character on the border */
+  auto put = [&border_origin, &attrib](char c, unsigned short x, unsigned short y)
+  {
+    (border_origin + coord{x,y}).vram_addr()[0] = c;
+    (border_origin + coord{x,y}).vram_addr()[1] = attrib;
+  };
+
+  /* Top Row */
+  {
+    /* Upper left and right characters  */
+    put(char(201), 0, 0);
+    put(char(187), size.x + 1, 0);
+
+    /* Plot the title */
+    unsigned short index = 1;
+    for(char c : title)
+      put(c, index++, 0);
+
+    /* Plot remaining title bar */
+    for(; index <= size.x; ++index)
+      put(char(205), index, 0);
+  }
+
+  /* Bottom Row */
+  {
+    /* Lower left and right characters */
+    put(char(200), 0, size.y + 1);
+    put(char(188), size.x + 1, size.y + 1);
+
+    /* Plot bar */
+    for(unsigned short i = 1; i <= size.x; ++i)
+      put(char(205), i, size.y + 1);
+  }
+
+  /* Plot Left and Right Columns */
+  for(unsigned short i = 1; i <= size.y; ++i)
+  {
+    put(char(186), 0, i);
+    put(char(186), size.x+1, i);
+  }
 }
 
 /* Scroll the display */

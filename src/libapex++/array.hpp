@@ -107,7 +107,7 @@ struct array
   { return _size == 0; }
 
   constexpr size_type size() const
-  { return size; }
+  { return _size; }
 
   constexpr size_type max_size() const
   { return size(); }
@@ -135,8 +135,8 @@ struct array
  * Lexicographic comparisons
  */
 
-template<typename T, typename U>
-bool operator==(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator==(array<T, N>const& lhs, array<T, N>const& rhs)
 {
   size_t s = lhs.size();
   if(rhs.size() != s)
@@ -149,12 +149,12 @@ bool operator==(array<T> const& lhs, array<U> const& rhs)
   return true;
 }
 
-template<typename T, typename U>
-bool operator!=(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator!=(array<T, N>const& lhs, array<T, N>const& rhs)
 { return !(lhs == rhs); }
 
-template<typename T, typename U>
-bool operator<(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator<(array<T, N>const& lhs, array<T, N>const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -166,8 +166,8 @@ bool operator<(array<T> const& lhs, array<U> const& rhs)
   return lhs_s < rhs_s;
 }
 
-template<typename T, typename U>
-bool operator<=(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator<=(array<T, N>const& lhs, array<T, N>const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -179,8 +179,8 @@ bool operator<=(array<T> const& lhs, array<U> const& rhs)
   return lhs_s <= rhs_s;
 }
 
-template<typename T, typename U>
-bool operator>(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator>(array<T, N>const& lhs, array<T, N>const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
@@ -192,8 +192,8 @@ bool operator>(array<T> const& lhs, array<U> const& rhs)
   return lhs_s > rhs_s;
 }
 
-template<typename T, typename U>
-bool operator>=(array<T> const& lhs, array<U> const& rhs)
+template<typename T, size_t N>
+bool operator>=(array<T, N>const& lhs, array<T, N>const& rhs)
 {
   size_t lhs_s = lhs.size();
   size_t rhs_s = rhs.size();
