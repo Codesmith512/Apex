@@ -17,6 +17,29 @@
 
 STL_BEGIN
 
+
+/**
+ * Swaps the values of two objects
+ */
+template<typename T>
+void swap(T& a, T& b)
+{
+  T c = a;
+  a = b;
+  b = c;
+}
+
+/**
+ * Replaces the argument with a new value, returning it's previous value
+ */
+template<typename T, typename U = T>
+T exchange(T& obj, U&& new_value)
+{
+  T temp = std::move(obj);
+  obj = std::forward<U&&>(new_value);
+  return temp;
+}
+
 /**
  * std::pair implementation
  */
@@ -91,18 +114,18 @@ pair<T1,T2> make_pair(T1 const& first, T2 const& second)
 
 /* Lexicographic comparisons */
 template<typename T1, typename T2>
-bool operator==(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator==(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 {
   return lexi::equal(lhs.first, rhs.first) && 
          lexi::equal(lhs.second, rhs.second);
 }
 
 template<typename T1, typename T2>
-bool operator!=(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator!=(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 { return !(lhs == rhs); }
 
 template <typename T1, typename T2>
-bool operator<(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator<(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 {
   if(lexi::not_equal(lhs.first, rhs.first))
     return lexi::less_than(lhs.first, rhs.first);
@@ -111,7 +134,7 @@ bool operator<(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
 }
 
 template <typename T1, typename T2>
-bool operator<=(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator<=(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 {
   if(lexi::not_equal(lhs.first, rhs.first))
     return lexi::less_or_equal(lhs.first, rhs.first);
@@ -120,7 +143,7 @@ bool operator<=(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
 }
 
 template <typename T1, typename T2>
-bool operator>(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator>(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 {
   if(lexi::not_equal(lhs.first, rhs.first))
     return lexi::greater_than(lhs.first, rhs.first);
@@ -129,7 +152,7 @@ bool operator>(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
 }
 
 template <typename T1, typename T2>
-bool operator>=(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
+bool operator>=(pair<T1,T2> const& lhs, pair<T1,T2> const& rhs)
 {
   if(lexi::not_equal(lhs.first, rhs.first))
     return lexi::greater_or_equal(lhs.first, rhs.first);
@@ -139,7 +162,7 @@ bool operator>=(std::pair<T1,T2> const& lhs, std::pair<T1,T2> const& rhs)
 
 /* Swap Specialization */
 template<typename T1, typename T2>
-void std::swap(std::pair<T1,T2>& first, std::pair<T1,T2>& second)
+void swap(pair<T1,T2>& first, pair<T1,T2>& second)
 { first.swap(second); }
 
 /* Tuple get */
@@ -150,26 +173,26 @@ namespace detail
   struct pair_get_index_t {};
 
   template<size_t index, typename T1, typename T2>
-  void pair_get_impl(pair<T1,T2>& p, pair_get_index<index>);
+  void pair_get_impl(pair<T1,T2>& p, pair_get_index_t<index>);
 
   template<typename T1, typename T2>
-  auto& pair_get_impl(pair<T1,T2>& p, pair_get_index<0>)
+  auto& pair_get_impl(pair<T1,T2>& p, pair_get_index_t<0>)
   { return p.first; }
   template<typename T1, typename T2>
-  auto const& pair_get_impl(pair<T1,T2> const& p, pair_get_index<0>)
+  auto const& pair_get_impl(pair<T1,T2> const& p, pair_get_index_t<0>)
   { return p.first; }
 
   template<typename T1, typename T2>
-  auto& pair_get_impl(pair<T1,T2>& p, pair_get_index<1>)
+  auto& pair_get_impl(pair<T1,T2>& p, pair_get_index_t<1>)
   { return p.second; }
   template<typename T1, typename T2>
-  auto const& pair_get_impl(pair<T1,T2> const& p, pair_get_index<1>)
+  auto const& pair_get_impl(pair<T1,T2> const& p, pair_get_index_t<1>)
   { return p.second; }
 }
 
 template<size_t index, typename T1, typename T2>
-auto& std::get(std::pair<T1,T2>& p)
-{ template detail::pair_get_impl<index>(p); }
+auto& get(pair<T1,T2>& p)
+{ return detail::pair_get_impl<index>(p, detail::pair_get_index_t<index>()); }
 
 /* Tuple_size helper */
 template<typename T1, typename T2>

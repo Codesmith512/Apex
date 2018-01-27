@@ -26,7 +26,7 @@ namespace lexi
 
   template<typename T1, typename T2>
   bool greater_than(T1 const& lhs, T2 const& rhs)
-  { return !less_than(lhs,rhs) && !euqal(lhs,rhs); }
+  { return !less_than(lhs,rhs) && !equal(lhs,rhs); }
 
   template<typename T1, typename T2>
   bool greater_or_equal(T1 const& lhs, T2 const& rhs)
