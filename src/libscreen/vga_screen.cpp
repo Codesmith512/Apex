@@ -24,7 +24,7 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size)
 }
 
 /* Constructs a windows with a border! */
-vga_screen::vga_screen(coord const& _origin, coord const& _size, attrib_t border_attrib, std::string const& _title)
+vga_screen::vga_screen(coord const& _origin, coord const& _size, std::string const& _title, attrib_t border_attrib, border_t thickness)
   :vga_screen(_origin, _size)
 {
   /* Validate size */
@@ -42,7 +42,7 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size, attrib_t border
     title = _title;
 
   /* Draw border with attribute */
-  update_border(border_attrib);
+  update_border(border_attrib, thickness);
 }
 
 /* Write a c-style string */
@@ -64,8 +64,10 @@ vga_screen& vga_screen::write(std::string const& str)
 }
 
 /* Re-draw the border */
-void vga_screen::update_border(vga_screen::attrib_t attrib)
+void vga_screen::update_border(attrib_t attrib, border_t thickness)
 {
+  border_attrib = attrib;
+
   /* The border's origin */
   coord border_origin = origin - coord{1,1};
 
@@ -76,11 +78,40 @@ void vga_screen::update_border(vga_screen::attrib_t attrib)
     (border_origin + coord{x,y}).vram_addr()[1] = attrib;
   };
 
+  /*
+   * The characters to draw with
+   * [0] = Upper-left
+   * [1] = Upper-right
+   * [2] = Lower-left
+   * [3] = Lower-right
+   * [4] = Horizontal bar
+   * [5] = Vertical bar
+   */
+  char palette[6];
+  if(thickness == border_t::thick)
+  {
+    palette[0] = 201;
+    palette[1] = 187;
+    palette[2] = 200;
+    palette[3] = 188;
+    palette[4] = 205;
+    palette[5] = 186;
+  }
+  else
+  {
+    palette[0] = 218;
+    palette[1] = 191;
+    palette[2] = 192;
+    palette[3] = 217;
+    palette[4] = 196;
+    palette[5] = 179;
+  }
+
   /* Top Row */
   {
     /* Upper left and right characters  */
-    put(char(201), 0, 0);
-    put(char(187), size.x + 1, 0);
+    put(palette[0], 0, 0);
+    put(palette[1], size.x + 1, 0);
 
     /* Plot the title */
     unsigned short index = 1;
@@ -89,27 +120,30 @@ void vga_screen::update_border(vga_screen::attrib_t attrib)
 
     /* Plot remaining title bar */
     for(; index <= size.x; ++index)
-      put(char(205), index, 0);
+      put(palette[4], index, 0);
   }
 
   /* Bottom Row */
   {
     /* Lower left and right characters */
-    put(char(200), 0, size.y + 1);
-    put(char(188), size.x + 1, size.y + 1);
+    put(palette[2], 0, size.y + 1);
+    put(palette[3], size.x + 1, size.y + 1);
 
     /* Plot bar */
     for(unsigned short i = 1; i <= size.x; ++i)
-      put(char(205), i, size.y + 1);
+      put(palette[4], i, size.y + 1);
   }
 
   /* Plot Left and Right Columns */
   for(unsigned short i = 1; i <= size.y; ++i)
   {
-    put(char(186), 0, i);
-    put(char(186), size.x+1, i);
+    put(palette[5], 0, i);
+    put(palette[5], size.x+1, i);
   }
 }
+
+void vga_screen::update_border(border_t thickness)
+{ update_border(border_attrib, thickness); }
 
 /* Scroll the display */
 void vga_screen::scroll()

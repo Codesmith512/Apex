@@ -99,6 +99,10 @@ public:
     char val;
   };
 
+  /* @enum border_t   The thickness of the border */
+  enum class border_t : uint8_t
+  { thick, thin, };
+
   /**
    * @param origin  The upper-left most character
    * @param size    The size of the screen
@@ -112,10 +116,11 @@ public:
    *
    * @param origin  The upper-left most character
    * @param size    The size of the screen
+   * @param title   The title of the screen
    * @param border_attrib   The attribute to draw the border with
-   * @param border_char     The character to use for the border
+   * @param thickness       Thick or thin border
    */
-  vga_screen(coord const& origin, coord const& size, attrib_t border_attrib, std::string const& title);
+  vga_screen(coord const& origin, coord const& size, std::string const& title, attrib_t border_attrib, border_t thickness);
 
   /**
    * Writes a c-style string at the cursor
@@ -133,8 +138,12 @@ public:
 
   /**
    * Re-draws the border with the given attribute
+   *
+   * @param border_attrib   The attribute to draw the border with
+   * @param thickness       Draw a think or thick border
    */
-  void update_border(attrib_t border_attrib);
+  void update_border(attrib_t border_attrib, border_t thickness);
+  void update_border(border_t thickness);
 
   /**
    * Scrolls the display one line
@@ -213,6 +222,8 @@ private:
 
   /* True if this window has a border */
   bool has_border;
+  /* The attribute of the border */
+  attrib_t border_attrib;
   /* Screen geometry */
   coord origin, size;
   /* The title of the window */

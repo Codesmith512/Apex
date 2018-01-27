@@ -82,14 +82,16 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
  */
 extern "C" int kernel_main()
 {
-  using attrib_t = screen::vga_screen::attrib_t;
+  using screen::vga_screen;
+  using attrib_t = vga_screen::attrib_t;
   using color = attrib_t::color;
 
   /* Test the new screen interface */
-  screen::vga_screen screen({0,1}, {80,24}, attrib_t(color::WHITE, color::BLACK), "Counter");
-  screen::vga_screen status({0,0}, {80,1});
+  vga_screen counter({0,1}, {40,24}, "Counter", attrib_t(color::WHITE, color::BLACK), vga_screen::border_t::thick);
+  vga_screen other({40,1}, {40,24}, "Unused", attrib_t(color::DARK_GRAY, color::BLACK), vga_screen::border_t::thin);
+  vga_screen status({0,0}, {80,1});
 
-  screen.push_attrib({color::LIGHT_GRAY, color::BLACK});
+  counter.push_attrib({color::LIGHT_GRAY, color::BLACK});
 
   status.push_attrib({color::LIGHT_GREEN, color::BLACK});
   status.push_attrib({color::YELLOW, color::BLACK});
@@ -99,7 +101,7 @@ extern "C" int kernel_main()
   {
     for(volatile int j = 0; j < 10000000; ++j);
 
-    screen << std::to_string(i) + "\n";
+    counter << std::to_string(i) + "\n";
 
     int i_prog = (i * 80) / 99;
     while(i_prog > prog)
