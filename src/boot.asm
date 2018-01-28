@@ -61,7 +61,7 @@ __page_directory:
 resb 4096
 
 ; Pad some space so the stack doesn't overlap the page directory
-db 0
+resb 0
 
 ; ####################################
 ; Allocate memory for the 16KiB stack

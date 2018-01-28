@@ -2,6 +2,7 @@
 #include "mem_manager"
 #include "multiboot2"
 #include "page_manager"
+#include "int"
 
 /* Screen */
 #include <vga_screen>
@@ -82,42 +83,11 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
  */
 extern "C" int kernel_main()
 {
-  /* Test the new screen interface */
-  using namespace screen;
+  /* Setup interrupts */
+  setup_interrupts();
 
-  vga_manager manager({80,25});
-  manager.enable_passive_update();
-
-  vga_screen& counter = manager.create_screen({0,1}, {40,24}, "Counter");
-  counter.push_attrib({color::LIGHT_GRAY, color::BLACK});
-
-  vga_screen& prog_s = manager.create_screen({20,10}, {40,3}, "Progress");
-  prog_s.push_attrib({color::LIGHT_GREEN, color::BLACK});
-  prog_s.push_attrib({color::YELLOW, color::BLACK});
-  manager.set_active(prog_s);
-
-  int prog = 0;
-  for(int i = 0; i < 100; ++i)
-  {
-    for(volatile int j = 0; j < 10000000; ++j);
-
-    counter << std::to_string(i) + "\n";
-
-    int i_prog = (i * 38) / 99;
-    while(i_prog > prog)
-    {
-      ++prog;
-      prog_s << "=";
-    }
-
-    if(i == 50)
-      manager.create_screen({40,1}, {40,24}, "Ghost");
-  }
-
-  prog_s.pop_attrib();
-  prog_s.flush_attrib();
-
-  manager.set_active();
+  /* invoke an interrupt */
+  int_0x03();
 
   return 0;
 }
