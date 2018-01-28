@@ -2,7 +2,7 @@
 #include "mem_manager"
 #include "multiboot2"
 #include "page_manager"
-#include "int"
+#include "interrupt"
 
 /* Screen */
 #include <vga_screen>
