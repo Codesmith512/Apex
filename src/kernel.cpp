@@ -2,7 +2,7 @@
 #include "mem_manager"
 #include "multiboot2"
 #include "page_manager"
-#include "interrupt"
+#include "interrupts"
 
 /* Screen */
 #include <vga_screen>
@@ -86,20 +86,24 @@ screen::vga_screen* debug_screen = nullptr;
 extern "C" int kernel_main()
 {
   /* Setup interrupts */
-  setup_interrupts();
+  interrupts::setup();
 
   screen::vga_manager manager({80,25});
   debug_screen = &manager.create_screen({0,0}, {80,25}, "Debug");
   manager.set_active(debug_screen);
 
   /* Register something for interrupt 3 */
-  register_int(0x03, []()
+  interrupts::add(0x03, []()
     {
       debug_screen->write("Debug hit!");
     }, true);
 
   /* Invoke the interrupt */
-  int_0x03();
+  interrupts::int_0x03();
+
+  /* This should crash */
+  interrupts::remove(0x03);
+  interrupts::int_0x03();
 
   return 0;
 }

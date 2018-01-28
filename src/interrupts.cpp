@@ -1,4 +1,4 @@
-#include "interrupt"
+#include "interrupts"
 
 #include <cstdlib>
 #include <cstring>
@@ -54,25 +54,14 @@ extern "C"
 }
 
 /* Blank interrupt setup */
-void setup_interrupts()
+void interrupts::setup()
 {
-  ///* Setup 0x03 */
-  //uint32_t call = reinterpret_cast<uint32_t>(&int_debug);
-  //idt[3].addr_low = static_cast<uint16_t>(call & 0xffff);
-  //idt[3].code_selector = 0x08;
-  //idt[3].attr.gate = 0b10;
-  //idt[3].attr.pmode = 1;
-  //idt[3].attr.storage_seg = 0;
-  //idt[3].attr.privl = 0;
-  //idt[3].attr.present = 1;
-  //idt[3].addr_high = static_cast<uint16_t>((call >> 16) & 0xffff);
-
   /* Submit idt */
   load_idt(idt);
 }
 
 /* Interrupt registration */
-void register_int(uint8_t vec, int_func func, bool is_int)
+void interrupts::add(uint8_t vec, int_func func, bool is_int)
 {
   /* Create a new callback handler */
   char* wrapper = reinterpret_cast<char*>(std::malloc(int_wrapper_s));
@@ -110,4 +99,17 @@ void register_int(uint8_t vec, int_func func, bool is_int)
   int_handle.attr.present = 1;
 
   return;
+}
+
+/* De-register interrupt */
+void interrupts::remove(uint8_t vec)
+{
+  idt_entry& int_handle = idt[vec];
+
+  uint32_t call = static_cast<uint32_t>(int_handle.addr_high) << 16 |
+                  static_cast<uint32_t>(int_handle.addr_low);
+
+  std::free(reinterpret_cast<void*>(call));
+
+  int_handle = {};
 }
