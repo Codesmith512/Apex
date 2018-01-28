@@ -66,7 +66,7 @@ enum class color : uint8_t
 struct attrib_t
 {
   /* Constructs an attribute from two colors */
-  attrib_t(color fg = color::WHITE, color bg = color::BLACK)
+  attrib_t(color fg, color bg)
   :val((static_cast<char>(bg) << 4) | static_cast<char>(fg))
   { }
 

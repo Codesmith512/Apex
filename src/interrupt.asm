@@ -32,28 +32,33 @@ load_idt:
 
 ; @func void enable_int()
 ; Enables interrupts
-global enable_int
-enable_int:
+global enable_hw_interrupts
+enable_hw_interrupts:
   sti
   ret
 
 ; @func void disable_int()
 ; Disables interrupts
-global disable_int
-disable_int:
+global disable_hw_interrupts
+disable_hw_interrupts:
   cli
   ret
 
-; @func void __asm_debug()
-; The standard debug function (from libapex)
-extern __asm_debug
-
-; @func int int_debug()
-; A dummy interrupt for use on 0x3
-global int_debug
-int_debug:
-  call __asm_debug
+; @func void int_wrapper
+; A function that can be used to generate
+; interrupt wrapper code for C/C++ functions
+global int_wrapper_f
+int_wrapper_f:
+  push .return
+  jmp 0x8:0xdeadc0de
+  .return:
   iret
+  .end:
+
+; @uint32_t int_wrapper_size
+; The size of the int_wrapper function
+global int_wrapper_s
+int_wrapper_s: dd (int_wrapper_f.end - int_wrapper_f)
 
 ; @func void int_0x03()
 ; Invokes interrupt 0x03

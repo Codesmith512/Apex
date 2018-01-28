@@ -15,7 +15,7 @@ vga_screen::vga_screen(coord const& _origin, coord const& _size, std::string con
   ,manager(_manager)
   ,title(_title)
   ,cursor_stack({{0,0}})
-  ,attrib_stack({color::LIGHT_GRAY, color::BLACK})
+  ,attrib_stack({{color::LIGHT_GRAY, color::BLACK}})
   ,framebuffer(size.y, std::vector<vga_entry>(size.x, {' ', {color::LIGHT_GRAY, color::BLACK}}))
 {
   /* Validate size */
