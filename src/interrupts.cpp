@@ -64,7 +64,7 @@ void interrupts::setup()
 void interrupts::add(uint8_t vec, int_func func, bool is_int)
 {
   /* Create a new callback handler */
-  char* wrapper = reinterpret_cast<char*>(std::malloc(int_wrapper_s));
+  char* wrapper = new char[int_wrapper_s];
 
   /* Awwww yeah -- it's not every day you get to cast
      a function pointer to a char pointer! :D */
@@ -109,7 +109,7 @@ void interrupts::remove(uint8_t vec)
   uint32_t call = static_cast<uint32_t>(int_handle.addr_high) << 16 |
                   static_cast<uint32_t>(int_handle.addr_low);
 
-  std::free(reinterpret_cast<void*>(call));
+  delete[] reinterpret_cast<char*>(call);
 
   int_handle = {};
 }
