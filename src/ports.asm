@@ -96,7 +96,7 @@ in_8:
   mov edx, [esp+12]
 
   ; Perform read
-  in dx, al
+  in al, dx
 
   ; Restore registers
   pop edx
@@ -119,7 +119,7 @@ in_16:
   mov edx, [esp+12]
 
   ; Perform read
-  in dx, ax
+  in ax, dx
 
   ; Restore registers
   pop edx
@@ -142,7 +142,7 @@ in_32:
   mov edx, [esp+12]
 
   ; Perform read
-  in dx, eax
+  in eax, dx
 
   ; Restore registers
   pop edx
@@ -162,7 +162,8 @@ io_wait:
 
   ; Write NOP
   ; note -- port 0x80 is only used for the BIOS, so it's not needed anymore
-  out 0x80, 0
+  mov al, 0
+  out 0x80, al
 
   ; Restore stack frame
   mov esp, ebp

@@ -2,6 +2,8 @@
 #include "mem_manager"
 #include "multiboot2"
 #include "page_manager"
+#include "pic"
+#include "ports"
 #include "interrupts"
 
 /* Screen */
@@ -92,19 +94,27 @@ extern "C" int kernel_main()
   debug_screen = &manager.create_screen({0,0}, {80,25}, "Debug");
   manager.set_active(debug_screen);
 
-  /* Register something for interrupt 3 */
-  interrupts::add(0x03, []()
-    {
-      debug_screen->write("Debug hit!");
-    }, true);
+  /* Register keyboard ISR */
+  interrupts::add(0x21, []()
+  {
+    (*debug_screen) << "Key event!\n";
 
-  /* Invoke the interrupt */
-  interrupts::int_0x03();
+    ports::in_8(0x60);
 
-  /* This should crash */
-  interrupts::remove(0x03);
-  interrupts::int_0x03();
+    pic::acknowledge(pic::irq_t::KEYBOARD);
+  }, true);
 
+  /* Setup PIC */
+  pic::initialize();
+  pic::unmask(pic::irq_t::KEYBOARD);
+
+  /* Enable interrupts */
+  interrupts::enable_hw_interrupts();
+
+  /* Hang w/ interrupts */
+  for(;;);
+
+  /* Success! */
   return 0;
 }
 
