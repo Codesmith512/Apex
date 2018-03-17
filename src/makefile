@@ -1,6 +1,6 @@
 # Define projects layout
 INC_DIR=./include
-PROJ_DEPS=libapex libapex++ libscreen
+PROJ_DEPS=libio libapex++ libapex
 
 # Define c++ compiler and Compile/Link FLAGS
 CC=i686-elf-g++
@@ -44,8 +44,8 @@ list:
 	@echo 'libapex-d          : Builds the common system framework with debug symbols'
 	@echo 'libapex++-r        : Builds the C++ STL'
 	@echo 'libapex++-d        : Builds the C++ STL with debug symbols'
-	@echo 'libscreen-r        : Builds the IO framework'
-	@echo 'libscreen-d        : Builds the IO framework with debug symbols'
+	@echo 'libio-r        : Builds the IO framework'
+	@echo 'libio-d        : Builds the IO framework with debug symbols'
 	@echo 'kernel-r(libapex)  : Builds the kernel'
 	@echo 'kernel-d(libapex)  : Builds the kernel with debug symbols'
 	@echo 'clean              : Cleans up all intermediate files'
@@ -96,20 +96,20 @@ libapex++-d:
 	make -C libapex++ libapex++-d
 
 # Build the IO framework
-.PHONY: libscreen-r
-libscreen-r:
-	make -C libscreen libscreen-r
+.PHONY: libio-r
+libio-r:
+	make -C libio libio-r
 
-.PHONY: libscreen-d
-libscreen-d:
-	make -C libscreen libscreen-d
+.PHONY: libio-d
+libio-d:
+	make -C libio libio-d
 
 # Build the kernel
-kernel-r: libapex-r libapex++-r libscreen-r $(CRTI_OBJ) $(ASM_OBJECTS) $(CPP_OBJECTS) $(CRTN_OBJ) $(CPP_INC_HEADERS)
+kernel-r: libapex-r libapex++-r libio-r $(CRTI_OBJ) $(ASM_OBJECTS) $(CPP_OBJECTS) $(CRTN_OBJ) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
 	$(CC) -T kernel.ld -o kernel.elf $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(ASM_OBJECTS) $(CPP_OBJECTS) $(CRTEND_OBJ) $(CRTN_OBJ) $(LIB_DEPS) $(LFLAGS)
 
-kernel-d: libapex-d libapex++-d libscreen-d $(CRTI_OBJ) $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CRTN_OBJ) $(CPP_INC_HEADERS)
+kernel-d: libapex-d libapex++-d libio-d $(CRTI_OBJ) $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CRTN_OBJ) $(CPP_INC_HEADERS)
 	rm kernel.elf || true
 	$(CC) -T kernel.ld -o kernel.elf $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(ASM_OBJECTS_D) $(CPP_OBJECTS_D) $(CRTEND_OBJ) $(CRTN_OBJ) $(LIB_DEPS) $(LFLAGS) $(LFLAGS_D)
 
@@ -118,7 +118,7 @@ kernel-d: libapex-d libapex++-d libscreen-d $(CRTI_OBJ) $(ASM_OBJECTS_D) $(CPP_O
 clean:
 	make -C libapex clean
 	make -C libapex++ clean
-	make -C libscreen clean
+	make -C libio clean
 	rm -f *.ao *.ao_d *.co *.co_d *.crto
 
 # Clean all
@@ -126,6 +126,6 @@ clean:
 distclean: clean
 	make -C libapex distclean
 	make -C libapex++ distclean
-	make -C libscreen distclean
+	make -C libio distclean
 	rm -f *.elf *.a
 	rm -rf $(INC_DIR)

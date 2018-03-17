@@ -6,7 +6,8 @@
 #include "ports"
 #include "interrupts"
 
-/* Screen */
+/* IO */
+#include <keyboard>
 #include <vga_screen>
 
 /* STL */
@@ -81,16 +82,15 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
  * Second-round init function, happens after _init
  *
  * Initializes
- * - Interrupts
+ * - Interrupts/PIC
  */
 extern "C" void kernel_init2()
 {
   /* Setup interrupts */
   interrupts::setup();
   interrupts::enable_hw_interrupts();
+  pic::initialize();
 }
-
-screen::vga_screen* debug_screen = nullptr;
 
 /**
  * Kernel main function -- do whatever you want!
@@ -101,23 +101,13 @@ screen::vga_screen* debug_screen = nullptr;
 extern "C" int kernel_main()
 {
   /* Setup Screen */
-  screen::vga_manager manager({80,25});
-  debug_screen = &manager.create_screen({0,0}, {80,25}, "Debug");
+  io::screen::vga_manager manager({80,25});
+  io::screen::vga_screen& debug_screen = manager.create_screen({0,0}, {80,25}, "Debug");
   manager.set_active(debug_screen);
 
-  /* Register keyboard ISR */
-  interrupts::add(0x21, []()
-  {
-    (*debug_screen) << "Key event!\n";
-
-    ports::in_8(0x60);
-
-    pic::acknowledge(pic::irq_t::KEYBOARD);
-  }, true);
-
-  /* Setup PIC */
-  pic::initialize();
-  pic::unmask(pic::irq_t::KEYBOARD);
+  /* Setup Keyboard */
+  io::keyboard::enable();
+  io::keyboard::register_callback(&io::screen::vga_manager::global_event);
 
   /* Hang w/ interrupts */
   for(;;);

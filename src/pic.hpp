@@ -24,6 +24,11 @@ namespace pic
       ALL = 0xffff,
     } e;
 
+    /* Construction from enum */
+    irq_t(E _e)
+    :e(_e)
+    { }
+
     /* Conversion from int */
     irq_t(uint16_t i)
     :e(static_cast<E>(i))

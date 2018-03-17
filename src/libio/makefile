@@ -28,8 +28,8 @@ CPP_OBJECTS_D=$(CPP_SOURCES:.cpp=.co_d)
 list:
 	@echo 'target(deps)       : Description'
 	@echo
-	@echo 'libscreen-r        : Builds the common IO framework'
-	@echo 'libscreen-d        : Builds the common IO framework in debug'
+	@echo 'libio-r        : Builds the common IO framework'
+	@echo 'libio-d        : Builds the common IO framework in debug'
 	@echo 'clean              : Cleans up all intermediate files'
 	@echo 'distclean(clean)   : Cleans up all distributable files'
 	@echo
@@ -48,13 +48,13 @@ $(INC_DIR)/% : %.hpp
 	$(CC) -c $< -o $@ $(CFLAGS) $(CFLAGS_D)
 
 # Build the IO framework
-libscreen-r: $(CPP_OBJECTS) $(CPP_INC_HEADERS)
+libio-r: $(CPP_OBJECTS) $(CPP_INC_HEADERS)
 	rm libscreen.a || true
-	$(AR) $(ARFLAGS) $(ARFLAGS_R) libscreen.a $^
+	$(AR) $(ARFLAGS) $(ARFLAGS_R) libio.a $^
 
-libscreen-d: $(CPP_OBJECTS_D) $(CPP_INC_HEADERS)
+libio-d: $(CPP_OBJECTS_D) $(CPP_INC_HEADERS)
 	rm libscreen.a || true
-	$(AR) $(ARFLAGS) $(ARFLAGS_D) libscreen.a $^
+	$(AR) $(ARFLAGS) $(ARFLAGS_D) libio.a $^
 
 # Clean
 .PHONY: clean
