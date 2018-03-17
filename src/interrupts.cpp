@@ -1,5 +1,7 @@
 #include "interrupts"
 
+#include <array>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <stdint.h>
@@ -8,7 +10,10 @@
 struct idt_entry
 {
   idt_entry()
-  :zero(0)
+  :addr_low(0)
+  ,code_selector(0)
+  ,zero(0)
+  ,addr_high(0)
   { }
 
   /* Manages the attribute fields */
@@ -41,8 +46,9 @@ struct idt_entry
   uint16_t addr_high;
 };
 
-/* The IDT */
-idt_entry idt[256];
+/* The IDT -- setup without constructor/destructor call */
+static char idt_mem[sizeof(idt_entry) * 256];
+static std::array<idt_entry, 256>& idt = *reinterpret_cast<std::array<idt_entry,256>*>(idt_mem);
 
 /* Declarations for functions in int.asm */
 extern "C"
@@ -56,8 +62,12 @@ extern "C"
 /* Blank interrupt setup */
 void interrupts::setup()
 {
+  /* Initialize table */
+  for(idt_entry& ie : idt)
+    ie = idt_entry();
+
   /* Submit idt */
-  load_idt(idt);
+  load_idt(idt.data());
 }
 
 /* Interrupt registration */

@@ -14,9 +14,6 @@ namespace interrupts
     void enable_hw_interrupts();
     /* Disables hardware based interrupts */
     void disable_hw_interrupts();
-
-    /* Invokes interrupt vector 3 */
-    void int_0x03();
   }
 
   /**

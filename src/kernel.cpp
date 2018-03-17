@@ -75,6 +75,9 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
 
   /* Enable the memory manager */
   m_manager.init(&pager);
+  
+  /* Setup interrupts */
+  interrupts::setup();
 }
 
 screen::vga_screen* debug_screen = nullptr;
@@ -87,9 +90,7 @@ screen::vga_screen* debug_screen = nullptr;
  */
 extern "C" int kernel_main()
 {
-  /* Setup interrupts */
-  interrupts::setup();
-
+  /* Setup Screen */
   screen::vga_manager manager({80,25});
   debug_screen = &manager.create_screen({0,0}, {80,25}, "Debug");
   manager.set_active(debug_screen);

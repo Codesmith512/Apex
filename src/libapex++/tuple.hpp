@@ -1,5 +1,10 @@
 #pragma once
 
+#include "cstddef"
+#include "libstl"
+#include "utility_forward"
+
+STL_BEGIN
 
 /**
  * @class tuple
@@ -7,10 +12,6 @@
  * The well-defined std::tuple class
  * http://en.cppreference.com/w/cpp/utility/tuple
  */
-#include "libstl"
-#include "utility_forward"
-
-STL_BEGIN
 
 /* Tuple with 3+ elements */
 template<typename T, typename... Us>

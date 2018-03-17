@@ -59,10 +59,3 @@ int_wrapper_f:
 ; The size of the int_wrapper function
 global int_wrapper_s
 int_wrapper_s: dd (int_wrapper_f.end - int_wrapper_f)
-
-; @func void int_0x03()
-; Invokes interrupt 0x03
-global int_0x03
-int_0x03:
-  int 0x03
-  ret
