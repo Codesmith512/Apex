@@ -46,9 +46,8 @@ struct idt_entry
   uint16_t addr_high;
 };
 
-/* The IDT -- setup without constructor/destructor call */
-static char idt_mem[sizeof(idt_entry) * 256];
-static std::array<idt_entry, 256>& idt = *reinterpret_cast<std::array<idt_entry,256>*>(idt_mem);
+/* The IDT */
+static std::array<idt_entry, 256> idt;
 
 /* Declarations for functions in int.asm */
 extern "C"

@@ -7,6 +7,10 @@
 ; The initialization function for the kernel
 extern kernel_init
 
+; @func void kernel_init2()
+; The other initialization function for the kernel
+extern kernel_init2
+
 ; @func void kernel_main()
 ; The main function for the kernel
 extern kernel_main
@@ -114,6 +118,8 @@ _boot:
   add esp, 8            ; Cleanup the stack
 
   call _init            ; Invoke GCC's initialization function
+
+  call kernel_init2     ; Another round of kernel initialization
 
   call kernel_main      ; Invoke kernel_main
   cmp ax, 0x00          ; Hard break if main fails

@@ -33,10 +33,10 @@ static mem_manager& m_manager = *reinterpret_cast<mem_manager*>(m_manager_memory
  * - Stack
  * - GDT
  *
- * Unsupported Features
- * - Paging (must setup)
- * - Heap (must setup)
- * - Global static variable initialization (happens after this function returns)
+ * Initializes
+ * - Paging
+ * - Dynamic Memory/Heap
+ * - Global static variables (after this function returns)
  */
 extern "C" void kernel_init(page_manager::page_directory* page_dir, const multiboot2::tag_entry* tags)
 {
@@ -75,9 +75,19 @@ extern "C" void kernel_init(page_manager::page_directory* page_dir, const multib
 
   /* Enable the memory manager */
   m_manager.init(&pager);
-  
+}
+
+/**
+ * Second-round init function, happens after _init
+ *
+ * Initializes
+ * - Interrupts
+ */
+extern "C" void kernel_init2()
+{
   /* Setup interrupts */
   interrupts::setup();
+  interrupts::enable_hw_interrupts();
 }
 
 screen::vga_screen* debug_screen = nullptr;
@@ -108,9 +118,6 @@ extern "C" int kernel_main()
   /* Setup PIC */
   pic::initialize();
   pic::unmask(pic::irq_t::KEYBOARD);
-
-  /* Enable interrupts */
-  interrupts::enable_hw_interrupts();
 
   /* Hang w/ interrupts */
   for(;;);
